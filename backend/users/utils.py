@@ -3,11 +3,15 @@ import requests
 import base64
 import urllib3
 import time
+from fastapi import UploadFile
+from aiobotocore.session import get_session
+from botocore.exceptions import ClientError
+from contextlib import asynccontextmanager
 from ..config import load_config
 
 urllib3.disable_warnings()
 
-class WorkGigaChat:
+class GigaChatClient:
     def __init__(
             self,
             client_id: str,
@@ -20,7 +24,6 @@ class WorkGigaChat:
 
     @staticmethod
     def token(self):
-        # credentials = f"{'3f56ef97-09f2-4492-bb4e-e9b87e4a52e6'}:{'8f7cd9dd-c8bf-4b93-86bd-ff9a7744877d'}"
         if self._access_token and time.time() < self._expires_at - 30 * 60:
             return self._access_token
 
@@ -43,6 +46,8 @@ class WorkGigaChat:
         request = requests.request("POST", url, headers=headers, data=payload, verify=False).json()
         self._access_token = request.get("access_token")
         self._expires_at = request.get("expires_at")
+
+        return self._access_token
 
     def load_file(
             self,
@@ -84,10 +89,83 @@ class WorkGigaChat:
 
         return result
 
+
+class S3Client:
+    def __init__(
+            self,
+            access_key: str,
+            secret_key: str,
+            endpoint_url: str,
+            bucket_name: str
+    ):
+        self.config = {
+            "aws_access_key_id": access_key,
+            "aws_secret_access_key": secret_key,
+            "endpoint_url": endpoint_url
+        }
+        self.bucket_name = bucket_name
+        self.session = get_session()
+
+    @asynccontextmanager
+    async def get_client(self):
+        async with self.session.create_client("s3", **self.config) as client:
+            yield client
+
+    async def upload_file(
+            self,
+            file: UploadFile
+    ):
+        try:
+            async with self.get_client() as client:
+                async with open(file, "rb") as file:
+                    await client.put_object(
+                        Bucket=self.bucket_name,
+                        Key=file.filename,
+                        Body=file
+                    )
+        except ClientError as e:
+            print("...")
+
+    async def delete_file(
+            self,
+            object_name: str
+    ):
+        try:
+            async with self.get_client() as client:
+                await client.delete_object(
+                    Bucket=self.bucket_name,
+                    Key=object_name
+                )
+        except ClientError as e:
+            print("...")
+
+
+    async def get_file(
+            self,
+            object_name: str
+    ):
+        try:
+            async with self.get_client() as client:
+                await client.get_object(
+                    Bucket=self.bucket_name,
+                    Key=object_name
+                )
+                # Далее логика возвращения файла куда-то
+
+        except ClientError as e:
+            print("...")
+
 config = load_config()
-giga_chat = WorkGigaChat(
+giga_chat = GigaChatClient(
     config.giga_chat.client_id,
     config.giga_chat.client_secret
+)
+
+s3_client = S3Client(
+    access_key="",
+    secret_key="",
+    endpoint_url="",
+    bucket_name=""
 )
 
 
