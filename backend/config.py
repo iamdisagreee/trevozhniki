@@ -13,11 +13,7 @@ from environs import Env
 #     secret_key: str
 #     algorithm: str
 #
-# @dataclass
-# class Mail:
-#     mail_user: str
-#     mail_password: str
-#
+
 @dataclass
 class GigaChat:
     client_id: str
