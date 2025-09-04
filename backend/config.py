@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import lru_cache
 
 from environs import Env
 
@@ -36,3 +37,21 @@ def load_config():
             client_secret=env("CLIENT_SECRET")
         )
     )
+
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from functools import lru_cache
+
+class Settings(BaseSettings):
+    gigachat_client_id: str = '123'
+    gigachat_client_secret: str = '123'
+
+    model_config = SettingsConfigDict(
+        env_file = '.env',
+        env_file_encoding='utf-8'
+    )
+
+@lru_cache()
+def get_settings():
+    print("Загрузка настроек...")
+    return Settings()
