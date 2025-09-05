@@ -1,4 +1,4 @@
 from .utils import GigaChat
 
 
-class UserService:
+# class UserService:
