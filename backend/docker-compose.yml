@@ -1,0 +1,6 @@
+  posts_service:
+    build: ./messages_service
+    ports:
+      - "127.0.0.1:8001:8000"
+    volumes:
+      - posts_db_data:/app/data

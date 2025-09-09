@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+sqlalchemy
+aiosqlite
+greenlet
+aio_pika
+redis[hiredis]
+fastapi-cache2
+fastapi-limiter
+loguru
+python-json-logger
+PyYAML>=6.0
+certifi
+aiobotocore
+python-multipart
+pydantic-settings
+aiofiles
