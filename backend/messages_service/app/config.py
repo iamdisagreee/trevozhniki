@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     s3_secret_key: Optional[str] = None
     s3_endpoint_url: Optional[str] = None
     s3_bucket_name: Optional[str] = None
+    postgres_connect: Optional[str] = None
 
     model_config = SettingsConfigDict(
         env_file ='app/.env',

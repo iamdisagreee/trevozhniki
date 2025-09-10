@@ -3,7 +3,6 @@ from fastapi import UploadFile, HTTPException, status
 from app.core.s3 import S3Client
 
 import os
-import aiofiles
 
 
 VALID_EXTENSION = 'json'
@@ -50,6 +49,8 @@ class MessageService:
                 detail='File size exceeded'
             )
 
+    # @staticmethod
+    # def generate_filename(file:):
 
     async def upload_file(self, file: UploadFile):
 
