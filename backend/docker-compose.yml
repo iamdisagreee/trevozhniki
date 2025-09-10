@@ -1,6 +1,24 @@
-  posts_service:
-    build: ./messages_service
-    ports:
-      - "127.0.0.1:8001:8000"
+services:
+#  posts_service:
+#    build: ./messages_service
+#    ports:
+#      - "127.0.0.1:8001:8000"
+#    volumes:
+#      - posts_db_data:/app/data
+  messages_service_pg:
+    image: postgres:latest
+    env_file:
+      - messages_service/app/.env
+    container_name: messages_service_pg
     volumes:
-      - posts_db_data:/app/data
+      - messages_service_data:/var/lib/postgresql/data
+#    environment:
+#      POSTGRES_DB: ${POSTGRES_DB}
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
+    restart: on-failure
+
+volumes:
+  messages_service_data:

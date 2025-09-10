@@ -1,4 +1,4 @@
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException, status
 
 from app.core.s3 import S3Client
 
@@ -9,29 +9,34 @@ import aiofiles
 VALID_EXTENSION = 'json'
 VALID_CONTENT_TYPE = 'application/json'
 MAX_FILE_SIZE = 1024 * 1024
-DIRECTORY_LOCATION = "../static"
-CHUNK_SIZE = 1024 * 1024
 
 
 class MessageService:
     def __init__(self, s3: S3Client):
         self.s3 = s3
 
+    @staticmethod
+    def check_file_extension(filename: str):
+        """ Проверка файла на расширение """
+        if filename.split(".")[-1] != VALID_EXTENSION:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Incorrect file extension'
+            )
 
     @staticmethod
-    async def read_and_save_file(file: UploadFile):
-        """ Асинхронно сохраняет загруженный файл на диск, читая его по частям """
-        file_path = f'{DIRECTORY_LOCATION}/{file.filename}'
-        try:
-            async with aiofiles.open(file_path, "wb") as out_file:
-                while content := await file.read(CHUNK_SIZE):
-                    await out_file.write(content)
-        except Exception as e:
-            pass
+    def check_file_content_type(content_type: str):
+        """ Проверка файла на заголовок Content-Type """
+        if content_type != VALID_CONTENT_TYPE:
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail='Invalid MIME-type of a file'
+            )
 
-    async def upload_file(self, file: UploadFile):
+    @staticmethod
+    def check_file_size(file: UploadFile):
+        """ Проверка файла на размер """
 
-        extension = file.filename.split(".")[-1]
         # Перемещаем указатель в конец файла
         file.file.seek(0, os.SEEK_END)
         # Получаем текущую позицию указателя в байтах - это размер файла
@@ -39,16 +44,20 @@ class MessageService:
         # Возвращаем указатель в начало файла
         file.file.seek(0, os.SEEK_SET)
 
-        if extension != VALID_EXTENSION:
-            pass
-        elif file.content_type != VALID_CONTENT_TYPE:
-            pass
-        elif file_size > MAX_FILE_SIZE:
-            pass
+        if file_size > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail='File size exceeded'
+            )
 
-        await self.read_and_save_file(file=file)
-        file_path = f'{DIRECTORY_LOCATION}/{file.filename}'
-        await self.s3.upload_file(file_path=file_path)
+
+    async def upload_file(self, file: UploadFile):
+
+        self.check_file_extension(file.filename)
+        self.check_file_content_type(file.content_type)
+        self.check_file_size(file)
+
+        await self.s3.upload_file(file=file)
 
     async def delete_file(self, object_name: str):
         self.s3.delete_file(object_name=object_name)

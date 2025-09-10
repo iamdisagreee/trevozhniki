@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 import aiofiles
 
@@ -33,29 +34,31 @@ class S3Client:
             yield client
 
     @staticmethod
-    def on_exception(response):
-        status_code = response.get("ResponseMetaData").get('HTTPStatusCode')
-        exc_message = response.get("Error").get("Message")
+    def on_exception(response: dict):
+        status_code = response.get("ResponseMetadata", {}).get('HTTPStatusCode', 'Botocore error')
+        exc_message = response.get("Error", {}).get("Message", 'Botocore error')
         raise HTTPException(status_code=status_code,
                             detail=exc_message)
 
     async def upload_file(
             self,
-            file_path: str
+            file: UploadFile
     ):
-        object_name = file_path.split("/")[-1]  # /users/artem/cat.jpg
+        object_name = file.filename
+        chunk_size = 1024 * 1024
         try:
             async with self.get_client() as client:
-                with open(file_path, "rb") as file:
+                while True:
+                    chunk = await file.read(chunk_size)
+                    if not chunk:
+                        break
                     await client.put_object(
                         Bucket=self.bucket_name,
                         Key=object_name,
-                        Body=file
+                        Body=chunk
                     )
         except ClientError as e:
-            print(e)
-            print("АШИБОЧКА")
-            # self.on_exception(e.response)
+            self.on_exception(e.response)
 
     async def delete_file(
             self,
@@ -69,7 +72,6 @@ class S3Client:
                 )
         except ClientError as e:
             self.on_exception(e.response)
-
 
     async def get_file(
             self,
@@ -86,12 +88,25 @@ class S3Client:
         except ClientError as e:
             self.on_exception(e.response)
 
+
 settings = get_settings()
-print(settings)
-print(settings.s3_access_key)
+
 s3_client = S3Client(
     access_key=settings.s3_access_key,
     secret_key=settings.s3_secret_key,
     endpoint_url=settings.s3_endpoint_url,
     bucket_name=settings.s3_bucket_name
 )
+#
+# async def main():
+#     s3_client = S3Client(
+#         access_key='345d156f804440039abf7fe03ad7e4a4',
+#         secret_key='7127bfee1afc4b21bf1dde421bd3cd57',
+#         endpoint_url='https://s3.ru-7.storage.selcloud.ru',
+#         bucket_name='project-trevozhniki'
+#     )
+    # await s3_client.upload_file('static/test.bash')
+
+#
+# if __name__ == "__main__":
+#     asyncio.run(main())
