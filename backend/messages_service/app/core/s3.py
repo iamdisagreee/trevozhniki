@@ -97,16 +97,3 @@ s3_client = S3Client(
     endpoint_url=settings.s3_endpoint_url,
     bucket_name=settings.s3_bucket_name
 )
-#
-# async def main():
-#     s3_client = S3Client(
-#         access_key='345d156f804440039abf7fe03ad7e4a4',
-#         secret_key='7127bfee1afc4b21bf1dde421bd3cd57',
-#         endpoint_url='https://s3.ru-7.storage.selcloud.ru',
-#         bucket_name='project-trevozhniki'
-#     )
-    # await s3_client.upload_file('static/test.bash')
-
-#
-# if __name__ == "__main__":
-#     asyncio.run(main())
