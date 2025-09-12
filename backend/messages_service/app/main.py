@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, APIRouter
 
-from app.api.routers import messages
+from .api.routers import messages
 
 
 @asynccontextmanager
@@ -22,7 +22,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-v1_router = APIRouter(prefix="/v1")
+v1_router = APIRouter(prefix="/api/v1")
 
 v1_router.include_router(messages.router)
 

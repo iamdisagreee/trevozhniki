@@ -4,7 +4,7 @@ from typing import List
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import  Integer, DateTime, String, func, ForeignKey
 
-from backend.messages_service.app.core.postgres import BaseSchema
+from ..core.postgres import BaseSchema
 
 
 
@@ -25,13 +25,14 @@ class File(BaseSchema):
 
     id: Mapped[int] = mapped_column(
         Integer,
-        nullale=False,
+        nullable=False,
         primary_key=True,
         autoincrement=True
     )
 
     name: Mapped[str] = mapped_column(
         String,
+        nullable=False
     )
 
     uploaded_at: Mapped[datetime] = mapped_column(
@@ -45,7 +46,8 @@ class File(BaseSchema):
         ForeignKey(
             'users.id',
             ondelete='cascade'
-        )
+        ),
+        nullable=False
     )
 
     user: Mapped["User"] = relationship(back_populates='files')

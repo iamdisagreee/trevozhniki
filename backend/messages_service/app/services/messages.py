@@ -1,9 +1,10 @@
 from fastapi import UploadFile, HTTPException, status
 
-from app.core.s3 import S3Client
+from ..core.s3 import S3Client
 
 import os
 
+from ..repositories.messages import MessageRepository
 
 VALID_EXTENSION = 'json'
 VALID_CONTENT_TYPE = 'application/json'
@@ -11,8 +12,13 @@ MAX_FILE_SIZE = 1024 * 1024
 
 
 class MessageService:
-    def __init__(self, s3: S3Client):
+    def __init__(
+            self,
+            s3: S3Client,
+            msg_repo: MessageRepository
+    ):
         self.s3 = s3
+        self.msg_repo = msg_repo
 
     @staticmethod
     def check_file_extension(filename: str):
@@ -59,9 +65,17 @@ class MessageService:
         self.check_file_size(file)
 
         await self.s3.upload_file(file=file)
+        await self.msg_repo.upload_file(
+            user_id= 0, # Здесь должны получить id из jwt-токена
+            filename= 'iamdisagreee-2025.10.12-22:01', #файлав
+        )
 
-    async def delete_file(self, object_name: str):
-        self.s3.delete_file(object_name=object_name)
+    async def delete_file(self, filename: str):
+        await self.s3.delete_file(filename=filename)
+        await self.msg_repo.delete_file(
+            user_id=0,
+            filename='iamdisagreee-2025.10.12-22:01'
+        )
 
-    async def get_file(self, object_name: str):
-        self.s3.get_file(object_name=object_name)
+    async def get_file(self, filename: str):
+        self.s3.get_file(filename=filename)

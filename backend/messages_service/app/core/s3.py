@@ -6,7 +6,7 @@ from fastapi import UploadFile, HTTPException
 from aiobotocore.session import get_session
 from botocore.exceptions import ClientError
 
-from app.config import get_settings
+from ..config import get_settings
 
 
 class S3Client:
@@ -62,26 +62,26 @@ class S3Client:
 
     async def delete_file(
             self,
-            object_name: str
+            filename: str
     ):
         try:
             async with self.get_client() as client:
                 await client.delete_object(
                     Bucket=self.bucket_name,
-                    Key=object_name
+                    Key=filename
                 )
         except ClientError as e:
             self.on_exception(e.response)
 
     async def get_file(
             self,
-            object_name: str
+            filename: str
     ):
         try:
             async with self.get_client() as client:
                 await client.get_object(
                     Bucket=self.bucket_name,
-                    Key=object_name
+                    Key=filename
                 )
                 # Далее логика возвращения файла куда-то
 
