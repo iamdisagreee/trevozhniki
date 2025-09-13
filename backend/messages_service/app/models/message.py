@@ -35,6 +35,11 @@ class File(BaseSchema):
         nullable=False
     )
 
+    type: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+    )
+
     uploaded_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,

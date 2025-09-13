@@ -8,4 +8,8 @@ class CamelCaseModel(BaseModel):
     )
 
 class DeleteFile(CamelCaseModel):
-    filename: str # Далее будем проверять по регулярному выражениюа
+    id: int
+    name: str
+
+class ProcessingFile(CamelCaseModel):
+    filename: str

@@ -79,10 +79,13 @@ class S3Client:
     ):
         try:
             async with self.get_client() as client:
-                await client.get_object(
+                response = await client.get_object(
                     Bucket=self.bucket_name,
                     Key=filename
                 )
+                #print(response)
+                file = await response.get("Body").read()
+                return file
                 # Далее логика возвращения файла куда-то
 
         except ClientError as e:

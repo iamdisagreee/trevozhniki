@@ -1,24 +1,32 @@
-from fastapi import UploadFile, HTTPException, status
+import asyncio
+from asyncio import sleep
 
+from fastapi import UploadFile, HTTPException, status
+from io import BytesIO
+
+from ..core.giga import GigaChatClient
 from ..core.s3 import S3Client
 
 import os
 
 from ..repositories.messages import MessageRepository
 
-VALID_EXTENSION = 'json'
-VALID_CONTENT_TYPE = 'application/json'
-MAX_FILE_SIZE = 1024 * 1024
+VALID_EXTENSION = 'pdf'
+VALID_CONTENT_TYPE = 'application/pdf'
+MAX_FILE_SIZE = 1024 * 1024* 5
 
 
 class MessageService:
     def __init__(
             self,
             s3: S3Client,
-            msg_repo: MessageRepository
+            msg_repo: MessageRepository,
+            giga: GigaChatClient
     ):
+
         self.s3 = s3
         self.msg_repo = msg_repo
+        self.giga = giga
 
     @staticmethod
     def check_file_extension(filename: str):
@@ -67,15 +75,32 @@ class MessageService:
         await self.s3.upload_file(file=file)
         await self.msg_repo.upload_file(
             user_id= 0, # Здесь должны получить id из jwt-токена
-            filename= 'iamdisagreee-2025.10.12-22:01', #файлав
+            filename= 'iamdisagreee-2025.10.12-22:01', #файла
+            type_file='json'
         )
 
-    async def delete_file(self, filename: str):
+    async def delete_file(
+            self,
+            file_id: int,
+            filename: str):
         await self.s3.delete_file(filename=filename)
         await self.msg_repo.delete_file(
-            user_id=0,
-            filename='iamdisagreee-2025.10.12-22:01'
+            file_id=file_id
         )
 
-    async def get_file(self, filename: str):
-        self.s3.get_file(filename=filename)
+#    async def get_file(self, filename: str):
+#        await self.s3.get_file(filename="result.pd")
+
+    async def create_request_gigachat(self, filename: str):
+        file = await self.s3.get_file(filename="result.pdf")
+        #print(response.get("Body"))
+        #data = await response["Body"].read()
+
+        bio = BytesIO(file)
+        bio.name = "result.pdf"
+        uploaded_file = self.giga.upload_file(bio)
+        print(uploaded_file)
+        await sleep(1)
+        return self.giga.request_processing(file_id=uploaded_file.id_)
+
+

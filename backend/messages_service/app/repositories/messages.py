@@ -13,18 +13,20 @@ class MessageRepository:
             self,
             user_id: int,
             filename: str,
+            type_file: str
     ):
         uploaded_file = File(
             name=filename,
-            user_id=user_id
+            user_id=user_id,
+            type=type_file
         )
+
         self.postgres.add(uploaded_file)
         await self.postgres.commit()
 
     async def delete_file(
             self,
-            user_id: int,
-            filename: str
+            file_id: int
     ):
-        await self.postgres.execute(delete(File).where(File.user_id==user_id, File.name==filename))
+        await self.postgres.execute(delete(File).where(File.id == file_id))
         await self.postgres.commit()

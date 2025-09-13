@@ -80,3 +80,5 @@ websockets==15.0.1
 wrapt==1.17.3
 yarl==1.20.1
 zipp==3.21.0
+gigachat
+urllib3
