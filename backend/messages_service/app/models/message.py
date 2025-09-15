@@ -35,7 +35,7 @@ class File(BaseSchema):
         nullable=False
     )
 
-    type: Mapped[str] = mapped_column(
+    extension: Mapped[str] = mapped_column(
         String,
         nullable=False,
     )

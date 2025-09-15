@@ -38,13 +38,14 @@ class S3Client:
         status_code = response.get("ResponseMetadata", {}).get('HTTPStatusCode', 'Botocore error')
         exc_message = response.get("Error", {}).get("Message", 'Botocore error')
         raise HTTPException(status_code=status_code,
-                            detail=exc_message)
+                            detail=exc_message)#'There is no file with such name')
 
     async def upload_file(
             self,
-            file: UploadFile
+            file: UploadFile,
+            filename: str
     ):
-        object_name = file.filename
+
         chunk_size = 1024 * 1024
         try:
             async with self.get_client() as client:
@@ -54,7 +55,7 @@ class S3Client:
                         break
                     await client.put_object(
                         Bucket=self.bucket_name,
-                        Key=object_name,
+                        Key=filename,
                         Body=chunk
                     )
         except ClientError as e:
@@ -66,6 +67,10 @@ class S3Client:
     ):
         try:
             async with self.get_client() as client:
+                await client.get_object(
+                    Bucket=self.bucket_name,
+                    Key=filename
+                )
                 await client.delete_object(
                     Bucket=self.bucket_name,
                     Key=filename
@@ -73,9 +78,11 @@ class S3Client:
         except ClientError as e:
             self.on_exception(e.response)
 
+
+
     async def get_file(
             self,
-            filename: str
+            filename: str,
     ):
         try:
             async with self.get_client() as client:
@@ -83,10 +90,12 @@ class S3Client:
                     Bucket=self.bucket_name,
                     Key=filename
                 )
-                #print(response)
-                file = await response.get("Body").read()
-                return file
-                # Далее логика возвращения файла куда-то
+                data = await response.get("Body").read()
+                filepath = f"app/static/{filename}.txt"
+                with open(filepath, "wb") as file:
+                    file.write(data)
+
+                return filepath
 
         except ClientError as e:
             self.on_exception(e.response)

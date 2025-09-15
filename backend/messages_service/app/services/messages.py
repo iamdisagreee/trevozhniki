@@ -1,5 +1,7 @@
 import asyncio
 from asyncio import sleep
+from datetime import datetime, timezone
+from random import shuffle, choice
 
 from fastapi import UploadFile, HTTPException, status
 from io import BytesIO
@@ -11,9 +13,9 @@ import os
 
 from ..repositories.messages import MessageRepository
 
-VALID_EXTENSION = 'pdf'
-VALID_CONTENT_TYPE = 'application/pdf'
-MAX_FILE_SIZE = 1024 * 1024* 5
+VALID_EXTENSION = 'json'
+VALID_CONTENT_TYPE = 'application/json'
+MAX_FILE_SIZE = 1024 * 1024 * 5
 
 
 class MessageService:
@@ -63,44 +65,73 @@ class MessageService:
                 detail='File size exceeded'
             )
 
-    # @staticmethod
-    # def generate_filename(file:):
+    @staticmethod
+    def generate_filename(filename: str):
+        name = choice(['vova', 'nikita', 'nika', 'darina', 'margo'])
+        time_now = datetime.now(timezone.utc)
+        file_extension = filename.split(".")[-1]
+        return f"{name}-{file_extension}-{time_now.strftime("%Y.%m.%d-%H:%M")}"
 
-    async def upload_file(self, file: UploadFile):
+    async def upload_file(
+            self,
+            file: UploadFile
+    ):
 
         self.check_file_extension(file.filename)
         self.check_file_content_type(file.content_type)
         self.check_file_size(file)
+        new_filename = self.generate_filename(file.filename)
 
-        await self.s3.upload_file(file=file)
         await self.msg_repo.upload_file(
-            user_id= 0, # Здесь должны получить id из jwt-токена
-            filename= 'iamdisagreee-2025.10.12-22:01', #файла
-            type_file='json'
+            user_id=0,  # Здесь должны получить id из jwt-токена
+            filename=new_filename,  # файла
+            file_extension=file.filename.split('.')[-1]
+        )
+        await self.s3.upload_file(
+            file=file,
+            filename=new_filename
         )
 
     async def delete_file(
             self,
             file_id: int,
-            filename: str):
-        await self.s3.delete_file(filename=filename)
-        await self.msg_repo.delete_file(
-            file_id=file_id
-        )
+            filename: str
+    ):
+        await self.msg_repo.delete_file(file_id=file_id)
+        try:
+            await self.get_file(filename=filename)
 
-#    async def get_file(self, filename: str):
-#        await self.s3.get_file(filename="result.pd")
+            await self.s3.delete_file(filename=filename)
+        except HTTPException as e:
+            await self.msg_repo.rollback()
+            raise HTTPException(
+                status_code=e.status_code,
+                detail=e.detail
+            )
+        await self.msg_repo.commit()
 
-    async def create_request_gigachat(self, filename: str):
-        file = await self.s3.get_file(filename="result.pdf")
-        #print(response.get("Body"))
-        #data = await response["Body"].read()
+    async def get_file(self, filename: str):
+        return await self.s3.get_file(filename=filename)
 
-        bio = BytesIO(file)
-        bio.name = "result.pdf"
-        uploaded_file = self.giga.upload_file(bio)
-        print(uploaded_file)
-        await sleep(1)
-        return self.giga.request_processing(file_id=uploaded_file.id_)
+    async def create_request_gigachat(
+            self,
+            filepath: str
+    ):
+        # bio = BytesIO(file)
+        # bio.name = "result.pdf"
+        # bio='1'
+        try:
+            uploaded_file = self.giga.upload_file(filepath=filepath)
+            # print(uploaded_file)
+            return self.giga.request_processing(file_id=uploaded_file.id_)
+        except Exception as e:
+            self.delete_file_from_server(filepath=filepath)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail='GigaChat API unavailable'
+            )
 
 
+    @staticmethod
+    def delete_file_from_server(filepath: str):
+        os.remove(filepath)

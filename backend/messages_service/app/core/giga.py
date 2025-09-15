@@ -55,14 +55,14 @@ class GigaChatClient:
 
     def upload_file(
             self,
-            file
+            filepath: str
     ):
         self.token()
         self.create_giga_client()
 
+        print(filepath)
         return self.giga_client.upload_file(
-            #open(file_path, mode="rb")
-            file
+            open(filepath, mode="rb")
         )
 
     def delete_file(
@@ -83,6 +83,7 @@ class GigaChatClient:
 
         result = self.giga_client.chat(
             {
+                "model": 'GigaChat-Pro',
                 "messages": [
                     {
                         "role": "user",
@@ -90,7 +91,8 @@ class GigaChatClient:
                         "attachments": [file_id],
                     }
                 ],
-                "temperature": 0.1
+                "temperature": 0.1,
+                "max_tokens": 1000
             }
         )
 

@@ -43,10 +43,14 @@ async def create_processing_file(
         processing_file: ProcessingFile,
         message_service: MessageService = Depends(get_message_service)
 ):
-    """ Запрос с json-фйло с помощью GigaChat API"""
+    """ Запрос для обработки json-файла с помощью GigaChat API"""
 
-    answer = await message_service.create_request_gigachat(filename=processing_file.filename)
+    filepath = await message_service.get_file(filename=processing_file.name)
+
+    answer = await message_service.create_request_gigachat(filepath=filepath)
+
+    #await message_service.delete_file_from_server(filepath=filepath)
 
     return JSONResponse(
-        content={'Answer': answer}
+       content={'fileResponse': answer.choices[0].message.content}
     )
