@@ -1,0 +1,62 @@
+import jwt
+from fastapi import Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from .oauth2 import oauth2_scheme
+from .postgres import session_maker
+from ..config import get_settings
+from ..repositories.auths import AuthRepository
+from ..schemas.auth import GetUser
+from ..services.auths import AuthService
+
+
+async def get_postgres() -> AsyncSession:
+    async with session_maker() as session:
+        yield session
+
+async def get_auth_repository(
+        postgres: AsyncSession = Depends(get_postgres)
+) -> AuthRepository:
+    return AuthRepository(postgres=postgres)
+
+async def get_auth_service(
+        auth_repo: AuthRepository = Depends(get_auth_repository)
+) -> AuthService:
+    return AuthService(auth_repo=auth_repo)
+
+async def get_current_user(
+        token: str = Depends(oauth2_scheme),
+        auth_repo: AuthRepository = Depends(get_auth_repository)
+    ):
+
+        settings = get_settings()
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Could not validate credentials',
+            headers={'WWW-Authentication': "Bearer"}
+        )
+        #print(token, type(token))
+
+        try:
+            payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+            print(token)
+            user_id = payload.get('sub')
+            first_name = payload.get('firstname')
+            username = payload.get('username')
+            #email = payload.get('email')
+            if any(value is None for value in [user_id, first_name, username]):
+                raise credentials_exception
+
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access token has expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        except jwt.PyJWTError:
+            raise credentials_exception
+
+        user = await auth_repo.get_user_by_id(user_id=int(user_id))
+        if user is None:
+            raise credentials_exception
+        return GetUser.model_validate(user)
