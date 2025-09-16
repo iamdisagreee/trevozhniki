@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from random import shuffle, choice
 
 from fastapi import UploadFile, HTTPException, status
+from fastapi.responses import JSONResponse
 from io import BytesIO
 
 from ..core.giga import GigaChatClient
@@ -92,15 +93,24 @@ class MessageService:
             filename=new_filename
         )
 
+        return JSONResponse(
+            content={"detail": "File successfully loaded"},
+        )
+
     async def delete_file(
             self,
             file_id: int,
             filename: str
     ):
-        await self.msg_repo.delete_file(file_id=file_id)
+        result_postgres = await self.msg_repo.delete_file(file_id=file_id)
+        if not result_postgres.rowcount:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='There is no file with such id'
+            )
+
         try:
             await self.get_file(filename=filename)
-
             await self.s3.delete_file(filename=filename)
         except HTTPException as e:
             await self.msg_repo.rollback()
@@ -109,6 +119,10 @@ class MessageService:
                 detail=e.detail
             )
         await self.msg_repo.commit()
+
+        return JSONResponse(
+            content={'detail': "File successfully deleted"}
+        )
 
     async def get_file(self, filename: str):
         return await self.s3.get_file(filename=filename)
@@ -122,10 +136,9 @@ class MessageService:
         # bio='1'
         try:
             uploaded_file = self.giga.upload_file(filepath=filepath)
-            # print(uploaded_file)
             return self.giga.request_processing(file_id=uploaded_file.id_)
         except Exception as e:
-            self.delete_file_from_server(filepath=filepath)
+            self.delete_file_after_giga(filepath=filepath)
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail='GigaChat API unavailable'
@@ -133,5 +146,6 @@ class MessageService:
 
 
     @staticmethod
-    def delete_file_from_server(filepath: str):
+    def delete_file_after_giga(filepath: str):
         os.remove(filepath)
+

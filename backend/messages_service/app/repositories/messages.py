@@ -31,12 +31,6 @@ class MessageRepository:
     ):
         result = await self.postgres.execute(delete(File).where(File.id == file_id))
 
-        if not result.rowcount:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='There is no file with such id'
-            )
-
         return result
 
     async def rollback(self):

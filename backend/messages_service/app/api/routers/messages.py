@@ -5,7 +5,6 @@ from ...services.messages import MessageService
 from ...core.dependecies import get_message_service
 from ...schemas.message import DeleteFile, ProcessingFile
 
-import os
 
 router = APIRouter(prefix='/messages', tags=['messages'])
 
@@ -14,13 +13,8 @@ async def create_upload_file(
         file: UploadFile = File(...),
         message_service: MessageService = Depends(get_message_service)
 ):
-    """ Загрузка json-файла в s3 , postgres"""
-
-    await message_service.upload_file(file=file)
-
-    return JSONResponse(
-        content={"detail": "File successfully loaded"},
-    )
+    """ Загрузка json-файла в s3, postgres"""
+    return await message_service.upload_file(file=file)
 
 @router.delete("/deletefile", response_class=JSONResponse)
 async def crete_delete_file(
@@ -29,14 +23,11 @@ async def crete_delete_file(
 ):
     """ Удаление json-файла из s3, postgres"""
 
-    await message_service.delete_file(
+    return await message_service.delete_file(
         file_id=delete_file.id,
         filename=delete_file.name,
     )
 
-    return JSONResponse(
-        content={'detail': "File successfully deleted"}
-    )
 
 @router.post("/processingfile", response_class=JSONResponse)
 async def create_processing_file(
@@ -49,7 +40,7 @@ async def create_processing_file(
 
     answer = await message_service.create_request_gigachat(filepath=filepath)
 
-    #await message_service.delete_file_from_server(filepath=filepath)
+    await message_service.delete_file_after_giga(filepath=filepath)
 
     return JSONResponse(
        content={'fileResponse': answer.choices[0].message.content}

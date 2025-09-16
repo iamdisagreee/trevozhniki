@@ -28,6 +28,10 @@ v1_router.include_router(messages.router)
 
 app.include_router(v1_router)
 
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
 
 
 
