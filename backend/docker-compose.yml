@@ -44,6 +44,21 @@ services:
       - 6379:6379
     restart: on-failure
 
+  rabbitmq:
+    image: rabbitmq:4.1.1-management-alpine
+    ports:
+      - "127.0.0.1:5672:5672"     # 👈 порт AMQP
+      - "127.0.0.1:15672:15672" # Порт для веб-интерфейса RabbitMQ Management
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: 10092025
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
 volumes:
   messages_service_pg_data:
   auth_service_pg_data:

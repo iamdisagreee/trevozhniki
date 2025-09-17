@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     mail_user: Optional[str] = None
     mail_password: Optional[str] = None
     redis_connect: Optional[str] = None
+    amqp_url: Optional[str] = None
+
     model_config = SettingsConfigDict(
         env_file ='app/.env',
         env_file_encoding='utf-8',

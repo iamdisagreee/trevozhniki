@@ -1,15 +1,18 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, APIRouter
 
 from .api.routers import auths
+from .core.rabbitmq_worker import run_consumer
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        pass
+        consumer_task = asyncio.create_task(run_consumer())
         yield
-        pass
+        consumer_task.cancel()
     except Exception as e:
         pass
     finally:

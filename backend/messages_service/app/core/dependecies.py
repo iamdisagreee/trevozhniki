@@ -1,6 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .rabbitmq import jwt_validator_instance
 from ..repositories.messages import MessageRepository
 from ..services.messages import MessageService
 from ..core.s3 import s3_client, S3Client
@@ -35,3 +36,6 @@ def get_message_service(
         msg_repo=msg_repo,
         giga=giga
     )
+
+def get_jwt_validator_instance():
+    return jwt_validator_instance
