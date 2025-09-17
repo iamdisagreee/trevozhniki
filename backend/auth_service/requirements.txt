@@ -85,3 +85,5 @@ urllib3
 bcrypt
 PyJWT
 python-dotenv
+redis>=4.2
+setuptools

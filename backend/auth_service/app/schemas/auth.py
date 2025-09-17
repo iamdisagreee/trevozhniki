@@ -18,3 +18,10 @@ class GetUser(CamelCaseModel):
     firstname: str
     username: str
     email: EmailStr
+
+class SendConfirmationCode(CamelCaseModel):
+    email: EmailStr
+
+class ConfirmCode(CamelCaseModel):
+    email: EmailStr
+    entered_code: int = Field(ge=100_000, le=999_999)

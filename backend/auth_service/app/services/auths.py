@@ -1,11 +1,17 @@
 from datetime import datetime, timezone, timedelta
+from random import randint
+
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request, Form, status, Response, Cookie
 from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
 from fastapi.responses import JSONResponse
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import redis.asyncio as aioredis
 
-from ..config import get_settings
+from ..config import Settings
 from ..repositories.auths import AuthRepository
 from ..schemas.auth import CreateUser
 
@@ -13,11 +19,14 @@ from ..schemas.auth import CreateUser
 class AuthService:
     def __init__(
             self,
-            auth_repo: AuthRepository
+            auth_repo: AuthRepository,
+            redis: aioredis,
+            settings: Settings
     ):
         self.auth_repo = auth_repo
+        self.redis = redis
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        self.settings = get_settings()
+        self.settings = settings
 
     def hash_password(
             self,
@@ -140,7 +149,14 @@ class AuthService:
         return response
 
     @staticmethod
-    async def logout_user():
+    async def logout_user(request: Request):
+        refresh_token_cookie = request.cookies.get('refresh_token')
+        if refresh_token_cookie is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='There is no refresh token'
+            )
+
         response = JSONResponse(
             content={"detail": "User has successfully logged out"}
         )
@@ -170,4 +186,90 @@ class AuthService:
             username=create_user.username,
             email=create_user.email,
             hashed_password=self.hash_password(create_user.password)
+        )
+
+    @staticmethod
+    async def send_email(
+            from_email: str,
+            from_password: str,
+            to_email: str,
+            header: str,
+            body: str
+    ):
+        """
+        Отправка письма по электронной почте с использованием SMTP-сервера Яндекса
+        :param from_email: почта адресанта
+        :param from_password: специальный пароль адресанта
+        :param to_email: почта адресата
+        :param header: заголовок письма
+        :param body: текст письма
+        :return:
+        """
+
+        SMTP_SERVER = "smtp.yandex.com"
+        SMTP_PORT = 587
+
+        msg = MIMEMultipart()
+        msg["From"] = from_email
+        msg["To"] = to_email
+        msg["Subject"] = header
+        msg.attach(MIMEText(body, "plain"))
+
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(from_email, from_password)  # Авторизация
+            server.sendmail(from_email, to_email, msg.as_string())  # Отправляем письмо
+
+    async def create_send_email(
+            self,
+            to_email: str
+    ):
+        # Отправляем письмо
+        text_header = 'Код подтверждения'
+        auth_code = randint(100000, 999999)
+        text_body = f'Ваш код: {auth_code}'
+        await self.send_email(
+            from_email=self.settings.mail_user,
+            from_password=self.settings.mail_password,
+            to_email=to_email,
+            header=text_header,
+            body=text_body
+        )
+
+        # Добавляем в redis-хранилище email:auth_code
+        await self.redis.set(to_email, auth_code)
+
+        return JSONResponse(
+            content=
+            {
+                "detail": f"Confirmation code sent to {to_email}",
+            }
+        )
+
+    async def confirm_code(
+            self,
+            to_email: str,
+            entered_code: int
+    ):
+
+        correct_code = await self.redis.get(to_email)
+        if correct_code is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='There is no correct code'
+            )
+
+        if correct_code != entered_code:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Incorrect code entered'
+            )
+
+        await self.redis.delete(to_email)
+
+        return JSONResponse(
+            content=
+            {
+                'detail': 'User confirmed successfully'
+            }
         )

@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from ...core.dependecies import get_current_user, get_auth_service
-from ...schemas.auth import CreateUser, GetUser as UserSchema, GetUser
+from ...schemas.auth import CreateUser, GetUser as UserSchema, GetUser, ConfirmCode, SendConfirmationCode
 from ...services.auths import AuthService
 
 router = APIRouter(prefix='/auth', tags=['auth'])
@@ -44,11 +44,31 @@ async def refresh_access_token(
 
 @router.post("/logout", response_class=JSONResponse)
 async def logout(
+        request: Request,
         auth_service: AuthService = Depends(get_auth_service),
         current_user: GetUser = Depends(get_current_user),
 ):
     """ Выход из системы - Удаляем refresh token из куки"""
-    return await auth_service.logout_user()
+    return await auth_service.logout_user(request=request)
+
+
+@router.post("/send-confirmation-code", response_class=JSONResponse)
+async def send_confirmation_code(
+        send_confirmation: SendConfirmationCode,
+        auth_service: AuthService = Depends(get_auth_service),
+):
+    return await auth_service.create_send_email(to_email=send_confirmation.email)
+
+
+@router.post("/confirm-code")
+async def confirm_code(
+        confirm_code: ConfirmCode,
+        auth_service: AuthService = Depends(get_auth_service),
+):
+    return await auth_service.confirm_code(
+        entered_code=confirm_code.entered_code,
+        to_email=confirm_code.email
+    )
 
 
 @router.get('/me', response_class=JSONResponse)

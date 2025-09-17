@@ -1,10 +1,12 @@
 import jwt
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+import redis.asyncio as aioredis
 
+from .redis_connect import redis_client
 from .oauth2 import oauth2_scheme
 from .postgres import session_maker
-from ..config import get_settings
+from ..config import get_settings, Settings
 from ..repositories.auths import AuthRepository
 from ..schemas.auth import GetUser
 from ..services.auths import AuthService
@@ -19,10 +21,19 @@ async def get_auth_repository(
 ) -> AuthRepository:
     return AuthRepository(postgres=postgres)
 
+async def get_redis():
+    return redis_client
+
 async def get_auth_service(
-        auth_repo: AuthRepository = Depends(get_auth_repository)
+        auth_repo: AuthRepository = Depends(get_auth_repository),
+        redis: aioredis = Depends(get_redis),
+        settings: Settings = Depends(get_settings)
 ) -> AuthService:
-    return AuthService(auth_repo=auth_repo)
+    return AuthService(
+        auth_repo=auth_repo,
+        redis=redis,
+        settings=settings
+    )
 
 async def get_current_user(
         token: str = Depends(oauth2_scheme),
@@ -39,7 +50,7 @@ async def get_current_user(
 
         try:
             payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
-            print(token)
+            #print(token)
             user_id = payload.get('sub')
             first_name = payload.get('firstname')
             username = payload.get('username')

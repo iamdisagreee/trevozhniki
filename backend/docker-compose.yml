@@ -11,7 +11,7 @@ services:
       - messages_service/app/.env
     container_name: messages_service_pg
     volumes:
-      - messages_service_data:/var/lib/postgresql/data
+      - messages_service_pg_data:/var/lib/postgresql/data
 #    environment:
 #      POSTGRES_DB: ${POSTGRES_DB}
 #      POSTGRES_USER: ${POSTGRES_USER}
@@ -26,11 +26,25 @@ services:
       - auth_service/app/.env
     container_name: auth_service_pg
     volumes:
-      - auth_service_data:/var/lib/postgresql/data
+      - auth_service_pg_data:/var/lib/postgresql/data
     ports:
       - 5433:5432
     restart: on-failure
 
+  auth_service_redis:
+    image: redis:latest
+    env_file:
+      - auth_service/app/.env
+    container_name: auth_service_redis
+    #command:
+    #  - redis-server --requirepass $$10092025
+    volumes:
+      - auth_service_redis_data:/data
+    ports:
+      - 6379:6379
+    restart: on-failure
+
 volumes:
-  messages_service_data:
-  auth_service_data:
+  messages_service_pg_data:
+  auth_service_pg_data:
+  auth_service_redis_data:
