@@ -1,0 +1,111 @@
+import asyncio
+from contextlib import asynccontextmanager
+import aiofiles
+
+from fastapi import UploadFile, HTTPException
+from aiobotocore.session import get_session
+from botocore.exceptions import ClientError
+
+from ..config import get_settings
+
+
+class S3Client:
+    def __init__(
+            self,
+            access_key: str,
+            secret_key: str,
+            endpoint_url: str,
+            bucket_name: str
+    ):
+        self.config = {
+            "aws_access_key_id": access_key,
+            "aws_secret_access_key": secret_key,
+            "endpoint_url": endpoint_url
+        }
+
+        self.bucket_name = bucket_name
+        self.session = get_session()
+        self.status_code = None
+        self.exc_message = None
+
+    @asynccontextmanager
+    async def get_client(self):
+        async with self.session.create_client("s3", **self.config) as client:
+            yield client
+
+    @staticmethod
+    def on_exception(response: dict):
+        status_code = response.get("ResponseMetadata", {}).get('HTTPStatusCode', 'Botocore error')
+        exc_message = response.get("Error", {}).get("Message", 'Botocore error')
+        raise HTTPException(status_code=status_code,
+                            detail=exc_message)#'There is no file with such name')
+
+    async def upload_file(
+            self,
+            file: UploadFile,
+            filename: str
+    ):
+
+        chunk_size = 1024 * 1024
+        try:
+            async with self.get_client() as client:
+                while True:
+                    chunk = await file.read(chunk_size)
+                    if not chunk:
+                        break
+                    await client.put_object(
+                        Bucket=self.bucket_name,
+                        Key=filename,
+                        Body=chunk
+                    )
+        except ClientError as e:
+            self.on_exception(e.response)
+
+    async def delete_file(
+            self,
+            filename: str
+    ):
+        try:
+            async with self.get_client() as client:
+                await client.get_object(
+                    Bucket=self.bucket_name,
+                    Key=filename
+                )
+                await client.delete_object(
+                    Bucket=self.bucket_name,
+                    Key=filename
+                )
+        except ClientError as e:
+            self.on_exception(e.response)
+
+
+
+    async def get_file(
+            self,
+            filename: str,
+    ):
+        try:
+            async with self.get_client() as client:
+                response = await client.get_object(
+                    Bucket=self.bucket_name,
+                    Key=filename
+                )
+                data = await response.get("Body").read()
+                filepath = f"app/static/{filename}.txt"
+                with open(filepath, "wb") as file:
+                    file.write(data)
+
+                return filepath
+
+        except ClientError as e:
+            self.on_exception(e.response)
+
+
+settings = get_settings()
+
+s3_client = S3Client(
+    access_key=settings.s3_access_key,
+    secret_key=settings.s3_secret_key,
+    endpoint_url=settings.s3_endpoint_url,
+    bucket_name=settings.s3_bucket_name
+)
