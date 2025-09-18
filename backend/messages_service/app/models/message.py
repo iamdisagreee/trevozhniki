@@ -8,17 +8,17 @@ from ..core.postgres import BaseSchema
 
 
 
-class User(BaseSchema):
-    __tablename__ = 'users'
-
-    id: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        primary_key=True,
-        autoincrement=True
-    )
-
-    files: Mapped[List["File"]] = relationship(back_populates='user')
+# class User(BaseSchema):
+#     __tablename__ = 'users'
+#
+#     id: Mapped[int] = mapped_column(
+#         Integer,
+#         nullable=False,
+#         primary_key=True,
+#         autoincrement=True
+#     )
+#
+#     files: Mapped[List["File"]] = relationship(back_populates='user')
 
 class File(BaseSchema):
     __tablename__ = 'files'
@@ -48,11 +48,11 @@ class File(BaseSchema):
 
     user_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey(
-            'users.id',
-            ondelete='cascade'
-        ),
+        # ForeignKey(
+        #     'users.id',
+        #     ondelete='cascade'
+        # ),
         nullable=False
     )
 
-    user: Mapped["User"] = relationship(back_populates='files')
+    # user: Mapped["User"] = relationship(back_populates='files')

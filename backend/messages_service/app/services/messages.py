@@ -8,11 +8,13 @@ from fastapi.responses import JSONResponse
 from io import BytesIO
 
 from ..core.giga import GigaChatClient
+from ..core.rabbitmq import RabbitMQValidator
 from ..core.s3 import S3Client
 
 import os
 
 from ..repositories.messages import MessageRepository
+from ..schemas.message import GetUser
 
 VALID_EXTENSION = 'json'
 VALID_CONTENT_TYPE = 'application/json'
@@ -24,12 +26,14 @@ class MessageService:
             self,
             s3: S3Client,
             msg_repo: MessageRepository,
-            giga: GigaChatClient
+            giga: GigaChatClient,
+            # rabbitmq: RabbitMQValidator
     ):
 
         self.s3 = s3
         self.msg_repo = msg_repo
         self.giga = giga
+        # self.rabbitmq = rabbitmq
 
     @staticmethod
     def check_file_extension(filename: str):
@@ -67,24 +71,30 @@ class MessageService:
             )
 
     @staticmethod
-    def generate_filename(filename: str):
-        name = choice(['vova', 'nikita', 'nika', 'darina', 'margo'])
+    def generate_filename(
+            filename: str,
+            username: str
+    ):
         time_now = datetime.now(timezone.utc)
         file_extension = filename.split(".")[-1]
-        return f"{name}-{file_extension}-{time_now.strftime("%Y.%m.%d-%H:%M")}"
+        return f"{username}-{file_extension}-{time_now.strftime("%Y.%m.%d-%H:%M")}"
 
     async def upload_file(
             self,
-            file: UploadFile
+            file: UploadFile,
+            user: GetUser,
     ):
 
         self.check_file_extension(file.filename)
         self.check_file_content_type(file.content_type)
         self.check_file_size(file)
-        new_filename = self.generate_filename(file.filename)
+        new_filename = self.generate_filename(
+            filename=file.filename,
+            username=user.username
+        )
 
         await self.msg_repo.upload_file(
-            user_id=0,  # Здесь должны получить id из jwt-токена
+            user_id=user.id,  # Здесь должны получить id из jwt-токена
             filename=new_filename,  # файла
             file_extension=file.filename.split('.')[-1]
         )
@@ -100,7 +110,7 @@ class MessageService:
     async def delete_file(
             self,
             file_id: int,
-            filename: str
+            filename: str,
     ):
         result_postgres = await self.msg_repo.delete_file(file_id=file_id)
         if not result_postgres.rowcount:
@@ -129,23 +139,30 @@ class MessageService:
 
     async def create_request_gigachat(
             self,
-            filepath: str
+            filename: str
     ):
         # bio = BytesIO(file)
         # bio.name = "result.pdf"
         # bio='1'
+        filepath = await self.s3.get_file(filename=filename)
+        uploaded_file = self.giga.upload_file(filepath=filepath)
+
         try:
-            uploaded_file = self.giga.upload_file(filepath=filepath)
-            return self.giga.request_processing(file_id=uploaded_file.id_)
+            response = self.giga.request_processing(file_id=uploaded_file.id_)
+            # new_file=BytesIO(response.encode())
+            # upload_file=UploadFile(
+            #     filename='aue',
+            #     file=new_file,
+            #     content_type='text/plain'
+            # )
+            # print(await upload_file.read())
+            return response
         except Exception as e:
-            self.delete_file_after_giga(filepath=filepath)
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail='GigaChat API unavailable'
             )
-
-
-    @staticmethod
-    def delete_file_after_giga(filepath: str):
-        os.remove(filepath)
+        finally:
+            os.remove(filepath)
+            self.giga.delete_file(file_id=uploaded_file.id_)
 

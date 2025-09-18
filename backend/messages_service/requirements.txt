@@ -48,7 +48,7 @@ propcache==0.3.2
 psycopg==3.2.6
 psycopg-binary==3.2.6
 pycron==3.1.2
-pydantic==2.11.2
+pydantic[email]==2.11.2
 pydantic-settings==2.10.1
 pydantic_core==2.33.1
 PyJWT==2.10.1

@@ -1,7 +1,8 @@
 import asyncio
+import json
 import uuid
 from typing import Optional
-
+from fastapi import HTTPException
 import aio_pika
 from aio_pika.abc import AbstractIncomingMessage
 
@@ -9,6 +10,7 @@ import os
 
 from .logging_config import logger
 from ..config import get_settings
+from ..schemas.message import GetUser
 
 
 class RpcClient:
@@ -64,7 +66,7 @@ class RpcClient:
             self.futures.pop(correlation_id, None)
             return None
 
-class RabbitMQJwtValidator:
+class RabbitMQValidator:
     """Конкретная реализация через RabbitMQ RPC."""
 
     def __init__(self, amqp_url: str):
@@ -76,17 +78,23 @@ class RabbitMQJwtValidator:
     async def close(self):
         await self.rpc_client.close()
 
-    async def jwt_validate_queue(self, token: str):
+    async def jwt_validate(self, token: str):
         logger.info("Отправляю token в rabbitmq")
         response = await self.rpc_client.call(
             body=token,
             routing_key='jwt_validate_queue'
         )
-        if response is None:
-            return False
-        return response
+        response_json = json.loads(response.decode())
+
+        logger.info(f'Получили в сервисе с сообщениями:\n{response_json}')
+
+        if response_json.get('status_code'):
+            raise HTTPException(
+                status_code=response_json.get('status_code'),
+                detail=response_json.get('exception')
+            )
+        else:
+            return GetUser.model_validate(response_json)
 
 settings = get_settings()
-jwt_validator_instance = RabbitMQJwtValidator(amqp_url=settings.amqp_url)
-#jwt_validator_instance.jwt_validate_queue(token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwiZmlyc3RuYW1lIjoidm92YSIsInVzZXJuYW1lIjoidm92YSIsImVtYWlsIjoidmF2YWtoYXJpdG9ub3YyMDA0QGdtYWlsLmNvbSIsImV4cCI6MTc1ODEyMTg1MX0.li2hyuXQ0v6rAarqlK87HadT-3TZ3HOoTXkkVOBpF3g')
-
+rabbitmq_validator_instance = RabbitMQValidator(amqp_url=settings.amqp_url)

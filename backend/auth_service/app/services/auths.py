@@ -256,10 +256,10 @@ class AuthService:
         if correct_code is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail='There is no correct code'
+                detail='No code with such email'
             )
 
-        if correct_code != entered_code:
+        if int(correct_code) != entered_code:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail='Incorrect code entered'
