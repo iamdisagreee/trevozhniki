@@ -1,7 +1,8 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete
-from ..models.message import File
+from ..models.message import File, Chat
+
 
 class MessageRepository:
     def __init__(
@@ -10,16 +11,23 @@ class MessageRepository:
     ):
         self.postgres = postgres
 
+    async def create_chat(self):
+        chat = Chat()
+        self.postgres.add(chat)
+        await self.postgres.commit()
+        return chat
     async def upload_file(
             self,
-            user_id: int,
             filename: str,
-            file_extension: str
+            file_extension: str,
+            user_id: int,
+            chat_id: int
     ):
         uploaded_file = File(
             name=filename,
+            extension=file_extension,
             user_id=user_id,
-            extension=file_extension
+            chat_id=chat_id
         )
 
         self.postgres.add(uploaded_file)

@@ -2,10 +2,11 @@ import asyncio
 from asyncio import sleep
 from datetime import datetime, timezone
 from random import shuffle, choice
-
+from gigachat.exceptions import ResponseError
+from sqlalchemy.exc import IntegrityError
 from fastapi import UploadFile, HTTPException, status
 from fastapi.responses import JSONResponse
-from io import BytesIO
+from io import BytesIO, StringIO
 
 from ..core.giga import GigaChatClient
 from ..core.rabbitmq import RabbitMQValidator
@@ -14,7 +15,7 @@ from ..core.s3 import S3Client
 import os
 
 from ..repositories.messages import MessageRepository
-from ..schemas.message import GetUser
+from ..schemas.message import GetUser, ProcessingFile
 
 VALID_EXTENSION = 'json'
 VALID_CONTENT_TYPE = 'application/json'
@@ -72,11 +73,10 @@ class MessageService:
 
     @staticmethod
     def generate_filename(
-            filename: str,
+            file_extension: str,
             username: str
     ):
-        time_now = datetime.now(timezone.utc)
-        file_extension = filename.split(".")[-1]
+        time_now = datetime.now()
         return f"{username}-{file_extension}-{time_now.strftime("%Y.%m.%d-%H:%M")}"
 
     async def upload_file(
@@ -89,14 +89,16 @@ class MessageService:
         self.check_file_content_type(file.content_type)
         self.check_file_size(file)
         new_filename = self.generate_filename(
-            filename=file.filename,
+            file_extension=file.filename.split(".")[-1],
             username=user.username
         )
 
+        chat = await self.msg_repo.create_chat()
         await self.msg_repo.upload_file(
-            user_id=user.id,  # Здесь должны получить id из jwt-токена
-            filename=new_filename,  # файла
-            file_extension=file.filename.split('.')[-1]
+            filename=new_filename,
+            file_extension=file.filename.split('.')[-1],
+            user_id=user.id,
+            chat_id=chat.id
         )
         await self.s3.upload_file(
             file=file,
@@ -104,7 +106,8 @@ class MessageService:
         )
 
         return JSONResponse(
-            content={"detail": "File successfully loaded"},
+            content={"detail": "File successfully loaded",
+                     "chatId": chat.id},
         )
 
     async def delete_file(
@@ -139,30 +142,60 @@ class MessageService:
 
     async def create_request_gigachat(
             self,
-            filename: str
+            file: ProcessingFile,
+            user: GetUser
     ):
-        # bio = BytesIO(file)
-        # bio.name = "result.pdf"
-        # bio='1'
-        filepath = await self.s3.get_file(filename=filename)
-        uploaded_file = self.giga.upload_file(filepath=filepath)
 
+        filepath = await self.s3.get_file(filename=file.name)
+        # uploaded_file = self.giga.upload_file(filepath=filepath)
         try:
-            response = self.giga.request_processing(file_id=uploaded_file.id_)
-            # new_file=BytesIO(response.encode())
-            # upload_file=UploadFile(
-            #     filename='aue',
-            #     file=new_file,
-            #     content_type='text/plain'
-            # )
-            # print(await upload_file.read())
-            return response
-        except Exception as e:
+            # response = self.giga.request_processing(file_id=uploaded_file.id_).choices[0].message.content
+            # response_text = StringIO(response)
+            response = 'aue'
+            response_text = StringIO(response)
+
+            new_filename = self.generate_filename(
+                file_extension='txt',
+                username=user.username
+            )
+
+            upload_file = UploadFile(
+                file=response_text,
+                filename=new_filename
+            )
+
+            await self.s3.upload_file(
+                file=upload_file,
+                filename=new_filename
+            )
+
+            await self.msg_repo.upload_file(
+                filename=new_filename,
+                file_extension='txt',
+                user_id=user.id,
+                chat_id=file.chat_id
+            )
+
+            return JSONResponse(
+                content={'fileResponse': response}
+            )
+
+        except ResponseError:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail='GigaChat API unavailable'
             )
+        except IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='No found chat with such chat id '
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=e.status_code,
+                detail=e.detail
+            )
         finally:
             os.remove(filepath)
-            self.giga.delete_file(file_id=uploaded_file.id_)
+            # self.giga.delete_file(file_id=uploaded_file.id_)
 

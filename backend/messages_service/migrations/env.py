@@ -20,7 +20,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from app.models.message import File
+from app.models.message import File, Chat
 from app.core.postgres import BaseSchema
 
 target_metadata = BaseSchema.metadata

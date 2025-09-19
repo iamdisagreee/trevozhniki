@@ -46,8 +46,8 @@ async def create_processing_file(
 ):
     """ Запрос для обработки json-файла с помощью GigaChat API"""
 
-    answer = await message_service.create_request_gigachat(filename=processing_file.name)
-
-    return JSONResponse(
-       content={'fileResponse': answer.choices[0].message.content}
+    return await message_service.create_request_gigachat(
+        file=processing_file,
+        user=current_user
     )
+

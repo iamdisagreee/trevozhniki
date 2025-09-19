@@ -8,7 +8,7 @@ class CamelCaseModel(BaseModel):
     )
 class File(CamelCaseModel):
     name: str = Field(pattern='[a-z]+-'
-                              'json-'
+                              '(json|txt)-'
                               '20[2-9][0-9].(0[1-9]|1[0-2]).([1-9]|1[0-9]|2[0-9]|3[0-1])-'
                               '([0-1][0-9]|2[0-3]):[0-5][0-9]')
 
@@ -17,7 +17,7 @@ class DeleteFile(File):
 
 
 class ProcessingFile(File):
-    pass
+    chat_id: int
 
 class GetUser(CamelCaseModel):
     id: int
