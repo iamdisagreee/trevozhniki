@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, alias_generators
 
+
+# Корневая модель для корректной обработки json
 class CamelCaseModel(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
