@@ -46,13 +46,8 @@ button {
     margin: 0 auto;
 }
 
+
 .form__auth {
-    /* max-width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh); */
     display: none;
     flex-direction: column;
     position: fixed;
@@ -68,6 +63,7 @@ button {
 }
 
 
+
 .form__auth-item {
     display: flex;
     flex-direction: column;
@@ -75,10 +71,15 @@ button {
 }
 
 
-.form__auth-reg {
+.form__auth-btn {
     margin-bottom: 10px;
     border: 1px solid;
     border-image: linear-gradient(180.00deg, rgba(187.75599670410156, 16.17656707763672, 215.6875, 1),rgba(79.9000473022461, 0, 249.6875, 0.93) 100%) 1;
+}
+
+.form__auth-mistake{
+    text-align: center;
+    color: red;
 }
 
 /* .confirm {
@@ -103,13 +104,15 @@ button {
     display: none;
     flex-direction: column;
     position: fixed;
+    justify-content: center;
+    /* alig */
     width: 300px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     border: 3px solid;
     border-image: linear-gradient(180.00deg, rgba(187.75599670410156, 16.17656707763672, 215.6875, 1),rgba(79.9000473022461, 0, 249.6875, 0.93) 100%) 1;
-    padding: 10px;
+    padding: 20px;
 }
 
 .form__code-title {
@@ -127,11 +130,50 @@ button {
     background-color: aquamarine;
     border: 1px solid;
     border-image: linear-gradient(180.00deg, rgba(187.75599670410156, 16.17656707763672, 215.6875, 1),rgba(79.9000473022461, 0, 249.6875, 0.93) 100%) 1;
+    margin-bottom: 10px;
+}
+
+.form__code-mistake {
+    text-align: center;
+    color: red;
 }
 
 .form__inner--active {
     display: flex;
 }
+ /*  --------------------------------------------------------------------- */
+
+ .form__login {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    justify-content: center;
+    width: 300px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid;
+    border-image: linear-gradient(180.00deg, rgba(187.75599670410156, 16.17656707763672, 215.6875, 1),rgba(79.9000473022461, 0, 249.6875, 0.93) 100%) 1;
+    padding: 20px;
+ } 
+
+ .form__login-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+ }
+
+ .form__login-btn {
+    border: 1px solid;
+    border-image: linear-gradient(180.00deg, rgba(187.75599670410156, 16.17656707763672, 215.6875, 1),rgba(79.9000473022461, 0, 249.6875, 0.93) 100%) 1;
+    margin-bottom: 10px;
+}
+
+ 
+
+ 
+
+
 
 
 
