@@ -14,7 +14,7 @@ async function loginn(body){
             {   
                 'Accept': 'application/json'
             },
-            credentials: 'include'
+            // credentials: 'include'
         })
 
         const data = await response.json()
@@ -31,8 +31,8 @@ async function loginn(body){
 }
 
 async function setAccessToken(data) {
-    if (data.accessToken && data.tokenType === 'Bearer'){
-        // localStorage.setItem('accessToken', data.accessToken)
+    if (data.access_token && data.token_type === 'Bearer'){
+        localStorage.setItem('access_token', data.access_token)
 
     }
     else {
@@ -44,16 +44,54 @@ async function setAccessToken(data) {
 formLogin.addEventListener('submit', async (event) => {
     event.preventDefault()
     const validatedForm = serializeForm(formLogin)
-    // console.log(Array.from(validatedForm.entries()))
-
-
+    let response
     try {
-        const response = await loginn(validatedForm)
-        localStorage.setItem('accessToken', response.accessToken)
+        response = await loginn(validatedForm)
+        console.log(response)
+
+    } catch (exception){
+        console.error(exception.message)
+        if (exception.message == '401 Incorrect username') {
+            const existMistake = formLogin.querySelector('.form__login-mistake')
+            // console.log(existMistake)
+            if (!existMistake){
+                formLogin.insertAdjacentHTML(
+                    'beforeend',
+                    `<span class="form__login-mistake"> Неправильный логин!</span>`
+                )
+            }
+            else {
+                existMistake.innerHTML = `
+                <span class="form__login-mistake"> Неправильный логин!</span>
+                `
+            }
+        } else if (exception.message == '401 Incorrect password') {
+            const existMistake = formLogin.querySelector('.form__login-mistake')
+            // console.log(existMistake)
+            if (!existMistake){
+                formLogin.insertAdjacentHTML(
+                    'beforeend',
+                    `<span class="form__login-mistake"> Неправильный пароль!</span>`
+                )
+            }
+            else {
+                existMistake.innerHTML = `
+                <span class="form__login-mistake"> Неправильный пароль!</span>
+                `
+            }
+        }
+        return 
+    }
+    
+    try {
+        await setAccessToken(response)
     } catch (exception){
         console.error(exception.message)
         return 
     }
+
+    window.location.href = "http://127.0.0.1:5500/index.html"
+
     
 })
 

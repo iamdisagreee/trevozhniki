@@ -201,7 +201,10 @@ formCode.addEventListener('submit', async (event) => {
     }
     catch (exception){
         console.error(exception.message)
+        return
     }
+
+    window.location.href = "http://127.0.0.1:5500/index.html"
 })
 
 formLogin.addEventListener('click', async (event) => {
