@@ -6,7 +6,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Processing</title>
     <link rel="stylesheet" type="text/css" href="css/styles.css"></link>
-    <script src="js/processing.js" defer></script>
+    <script src="js/processing.js" type="module" defer></script>
 </head>
 <body>
     <header class="header">
@@ -35,11 +35,15 @@
     </header>
     <main class="main">
         <div class="container">
-            <form class="form__file" enctype="multipart/form-data">
+            <form class="form__file messages--active" enctype="multipart/form-data">
                 <p class="form__file-title">Загрузите файл для анализа</p>
                 <input class="form__file-input" type="file" name="file" accept="application/json, .json" required> 
                 <button class="form__file-btn" type="submit">Отправить</button>
             </form>
+            <div class="chat">
+                <div class="loader"></div>
+                <div class="out"></div>
+            </div>
         </div>
     </main>
 </body>

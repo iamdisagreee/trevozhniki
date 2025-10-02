@@ -42,13 +42,6 @@ export async function refreshToken(){
             throw exception
         }
         
-        try {
-            await setAccessToken(data)
-        }
-        catch (exception){
-            throw exception
-        }
-        
         return data
 
     }catch (exception) {
@@ -63,5 +56,17 @@ export async function setAccessToken(data) {
     }
     else {
         throw new Error('Не получен access token!')
+    }
+}
+
+
+export async function handlingUnathorizedError() {
+    try {
+        const accessToken = await refreshToken()
+        await setAccessToken(accessToken)  
+    }
+    catch (exception) {
+        console.log(exception.message)
+        window.location.href = "http://127.0.0.1:5500/login.html"
     }
 }

@@ -225,7 +225,7 @@ body {
  /*  ---------------------------processing.html------------------------------------------ */
 
 .form__file {
-    display: flex;
+    display: none;
     flex-direction: column;
     /* width: 300px; */
     align-items: center;
@@ -271,6 +271,58 @@ body {
     text-align: center;
     color: red;
 }
+
+
+.chat {
+    border: 3px solid;
+    border-image: linear-gradient(180.00deg, rgba(187.75599670410156, 16.17656707763672, 215.6875, 1),rgba(79.9000473022461, 0, 249.6875, 0.93) 100%) 1;
+    height: calc(100vh - 150px);
+    margin: 0 auto;
+    width: 75%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap:100px;
+}
+
+.out::after {
+    content: "|";
+    font-weight: bold;
+    padding: 0 1px;
+    animation-name: cursor1;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes cursor1 {
+    50% {color: #fff}
+}
+
+.loader {
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid grey;
+    border-radius: 50%;
+    width: 240px;
+    height: 240px;
+    animation-name: spin;
+    animation-duration: 2s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(-360deg); }
+    100% { transform: rotate(-360dg); }
+}
+
+
+
+.messages--active {
+    display: flex;
+}
+
 
 
  
