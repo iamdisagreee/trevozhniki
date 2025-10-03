@@ -2,9 +2,19 @@ import { handlingUnathorizedError } from './token.js'
 
 
 
-const formFile = document.querySelector(".form__file")
-const chat = document.querySelector('.chat')
+const formChat = document.querySelector('.form__chat')
+const formChatFile = document.querySelector('.form__chat-file')
+const formChatStatus = document.querySelector('.form__chat-status')
+// const formChatFileChange = document.querySelector('.form__chat-file-change')
+const formChatBtn = document.querySelector('.form__chat-btn')
+const formChatBtnSvg = document.querySelector('.form__chat-btn-svg')
+const loader = document.querySelector('.loader')
 const out = document.querySelector('.out')
+
+formChat.addEventListener('submit', preventHandlingFormFile)
+formChatFile.addEventListener('change', addFilename)
+
+// const chat = document.querySelector('.chat')
 
 
 
@@ -33,28 +43,72 @@ async function uploadFile(body, token) {
             throw error
         }
 
+        return data
+
     } catch (exception) {
         throw exception
     }
-
 }
-async function preventProcessingFormFile(event) {
+
+async function processingFile(body, token) {
+    try {
+        const response = await fetch('http://127.0.0.1:8002/api/v1/messages/processingfile', {
+        method: 'POST',
+        body: body,
+        headers: 
+        {   
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        })
+        
+        const data = await response.json()
+
+        if (!response.ok){
+            const error = new Error(`${response.status} ${data.detail}`)
+            error.status = response.status
+            throw error
+        }
+
+        return data
+
+    } catch (exception) {
+        throw exception
+    }
+}
+
+function printingText(text, position) {
+    if (position === text.length) return
+    out.textContent += text[position]
+    // out.scrollIntoView(
+    //     false
+    //     // {behavior: "smooth", block: "end", inline: "end"}
+    // )
+    setTimeout(() => printingText(text, position+1), 0)
+}
+
+async function preventHandlingFormFile(event) {
     event.preventDefault()
-    return await processingFormFile()
+    if (!formChatFile.files.length){
+        formChatStatus.textContent = "Файл не загружен!!!!"
+
+    }
+    return await handlingFormFile()
 }
 
-
-async function processingFormFile(){
+async function handlingFormFile(){
+    let responseUpload
     const accessToken = localStorage.getItem('access_token')
-    const validatedForm = serializeForm(formFile)
+    const validatedForm = serializeForm(formChat)
+    console.log(Array.from(validatedForm.entries()))
     try{
-        await uploadFile(validatedForm, accessToken) 
+        responseUpload = await uploadFile(validatedForm, accessToken) 
     } catch (exception) {
         let message
         switch (exception.status){
             case 401: {
                 await handlingUnathorizedError()
-                await processingFormFile()
+                responseUpload = await handlingFormFile()
                 break
             }
             case 400:
@@ -70,41 +124,64 @@ async function processingFormFile(){
                 message = 'Попробуй еще раз!'
         }
         if (exception.status != 401){
-            const existMistake = formFile.querySelector('.form__file-mistake')
-            if (!existMistake){
-                formFile.insertAdjacentHTML(
-                    'beforeend',
-                    `<span class="form__file-mistake"> ${message}</span>`
-                )
-            }
-            else {
-                existMistake.innerHTML = `
-                <span class="form__file-mistake"> ${message}</span>`
-            }
+            formChatStatus.textContent = message 
             console.log(exception.message)
         }
         return
     }
 
-    formFile.classList.remove('messages--active')
-    chat.classList.add('messages--active')
+    formChatBtn.disabled = true
+    formChatFile.disabled = true
+    formChatStatus.textContent = ''
+    loader.classList.remove('hidden')
+    formChatBtnSvg.classList.remove('form__chat-btn-svg--active')
 
+    
+    // try {
+    //     responseProcessing = await processingFile(accessToken)
+    // } 
+    // catch (exception) {
+    //     let message
+    //     switch (exception.status) {
+    //         case 401: {
+    //             await handlingUnathorizedError()
+    //             responseProcessing = await processingFile()
+    //             break
+    //         }
+    //         default:
+    //             message = 'Попробуй еще раз!'
+    //     }
+    //     if (message.status != 401) {
+    //         console.log(exception.message)
+    //     }
+    //     return
+    // }
 
-    const str = 'Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!'
+    loader.classList.add('hidden')
+    out.classList.remove('hidden')
+    // const startPosition = 0
+    // printingText(responseProcessing.text, startPosition)
 
-    let position = 0
-    const typeText = () => {
-        if (position === str.length) return
-        out.textContent += str[position]
-        position++
-        setTimeout(typeText, 200)
-    }
-    typeText()
+    const startPosition = 0
+    printingText(`
+        Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!
+        Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!
+        Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!
+        Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!
+        Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!
+        Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!
+        Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!
+    `, startPosition)
 }
 
+function addFilename(){
+    // console.log(fileInput)
+    if (formChatFile.files.length > 0){
+        formChatStatus.textContent = formChatFile.files[0].name
+        formChatBtnSvg.classList.add('form__chat-btn-svg--active')
+    }
+}
 
-
-formFile.addEventListener('submit', preventProcessingFormFile)
 
 
 // const str = 'Сааааамыыый ллууууучшииий дееень заааахоооодииил вчееееера-а-а-а-а!!!'
