@@ -13,7 +13,7 @@ import redis.asyncio as aioredis
 
 from ..config import Settings
 from ..repositories.auths import AuthRepository
-from ..schemas.auth import CreateUser
+from ..schemas.auth import CreateUser, ValidateAuthForm
 
 
 class AuthService:
@@ -133,8 +133,8 @@ class AuthService:
 
         response = JSONResponse(
             content={
-                "access_token": access_token,
-                "token_type": "Bearer"
+                "accessToken": access_token,
+                "tokenType": "Bearer"
             }
         )
 
@@ -162,6 +162,31 @@ class AuthService:
         )
         response.delete_cookie('refresh_token')
         return response
+
+    async def validate_auth_form(
+            self,
+            validate_auth: ValidateAuthForm
+    ):
+        user_by_email = await self.auth_repo.get_user_by_email(email=validate_auth.email)
+        user_by_username = await self.auth_repo.get_user_by_username(username=validate_auth.username)
+
+        if user_by_username is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already registered"
+            )
+
+        if user_by_email is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+
+        return JSONResponse(
+            content={'detail': 'Successful validation for auth form!'},
+            headers={'Cache-Control': 'no-store'}
+        )
+
     async def add_user(
             self,
             create_user: CreateUser

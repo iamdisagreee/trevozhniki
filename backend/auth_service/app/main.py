@@ -2,6 +2,8 @@ import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, APIRouter
+from fastapi.middleware.cors import CORSMiddleware
+
 
 from .api.routers import auths
 from .core.rabbitmq_worker import run_consumer
@@ -30,6 +32,14 @@ v1_router.include_router(auths.router)
 
 app.include_router(v1_router)
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/health")
 async def health_check():
