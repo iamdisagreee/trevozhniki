@@ -7,6 +7,10 @@ class CamelCaseModel(BaseModel):
         from_attributes=True
     )
 
+class ValidateAuthForm(CamelCaseModel):
+    email: EmailStr
+    username: str
+
 class CreateUser(CamelCaseModel):
     firstname: str
     username: str

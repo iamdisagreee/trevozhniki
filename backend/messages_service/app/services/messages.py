@@ -1,4 +1,8 @@
 import asyncio
+import json
+from pyexpat.errors import messages
+
+import aiofiles
 from asyncio import sleep
 from datetime import datetime, timezone
 from random import shuffle, choice
@@ -19,7 +23,7 @@ from ..schemas.message import GetUser, ProcessingFile
 
 VALID_EXTENSION = 'json'
 VALID_CONTENT_TYPE = 'application/json'
-MAX_FILE_SIZE = 1024 * 1024 * 5
+MAX_FILE_SIZE = 1024 * 1024 * 1
 
 
 class MessageService:
@@ -79,35 +83,77 @@ class MessageService:
         time_now = datetime.now()
         return f"{username}-{file_extension}-{time_now.strftime("%Y.%m.%d-%H:%M")}"
 
+    @staticmethod
+    def file_change_logic(
+        file_json: dict
+    ):
+        new_file = {
+            'messages': list(
+                map(
+                lambda msg: {'from': msg['from'], 'text': msg['text']},
+                filter(lambda msg: not msg.get('mime_type'), file_json['messages'])
+                )
+            )
+        }
+        # print(new_file)
+        return new_file
+
+
+    async def preprocessing_file(
+            self,
+            file: UploadFile
+    ):
+        raw_bytes = await file.read()
+        file_json = json.loads(raw_bytes.decode('utf-8'))
+        # print(len(str(file_json)))
+        new_file = json.dumps(self.file_change_logic(file_json))
+        # print(len(str(new_file)))
+
+        processed_bytes = new_file.encode('utf-8')
+
+        return UploadFile(
+            filename=file.filename,
+            headers=file.headers,
+            file=BytesIO(processed_bytes) # Создаем файло-подобное отродие, то есть где есть метод read() и т.д.
+        )
+
     async def upload_file(
             self,
             file: UploadFile,
             user: GetUser,
     ):
+        processed_file = await self.preprocessing_file(file)
 
-        self.check_file_extension(file.filename)
-        self.check_file_content_type(file.content_type)
-        self.check_file_size(file)
+        self.check_file_extension(processed_file.filename)
+        self.check_file_content_type(processed_file.content_type)
+        self.check_file_size(processed_file)
         new_filename = self.generate_filename(
-            file_extension=file.filename.split(".")[-1],
+            file_extension=processed_file.filename.split(".")[-1],
             username=user.username
         )
 
         chat = await self.msg_repo.create_chat()
         await self.msg_repo.upload_file(
             filename=new_filename,
-            file_extension=file.filename.split('.')[-1],
+            file_extension=processed_file.filename.split('.')[-1],
             user_id=user.id,
             chat_id=chat.id
         )
         await self.s3.upload_file(
-            file=file,
+            file=processed_file,
             filename=new_filename
         )
 
         return JSONResponse(
             content={"detail": "File successfully loaded",
-                     "chatId": chat.id},
+                     "chatId": chat.id,
+                     "filename": new_filename},
+        )
+
+        return JSONResponse(
+            content={"detail": "File successfully loaded",
+                     "chatId": 2,
+                     "filename": 'vova-json-2025.09.19-08:09'},
         )
 
     async def delete_file(
@@ -146,12 +192,10 @@ class MessageService:
             user: GetUser
     ):
 
-        filepath = await self.s3.get_file(filename=file.name)
-        # uploaded_file = self.giga.upload_file(filepath=filepath)
+        filepath = await self.s3.get_file(filename=file.filename)
+        uploaded_file = self.giga.upload_file(filepath=filepath)
         try:
-            # response = self.giga.request_processing(file_id=uploaded_file.id_).choices[0].message.content
-            # response_text = StringIO(response)
-            response = 'aue'
+            response = self.giga.request_processing(file_id=uploaded_file.id_).choices[0].message.content
             response_text = StringIO(response)
 
             new_filename = self.generate_filename(
@@ -177,8 +221,14 @@ class MessageService:
             )
 
             return JSONResponse(
-                content={'fileResponse': response}
+                content={'text': response}
             )
+
+            # return JSONResponse(
+            #     content={'text': """
+            #     Есть над чем задуматься: непосредственные участники технического прогресса освещают чрезвычайно интересные особенности картины в целом, однако конкретные выводы, разумеется, ограничены исключительно образом мышления. Сложно сказать, почему некоторые особенности внутренней политики, вне зависимости от их уровня, должны быть описаны максимально подробно. Вот вам яркий пример современных тенденций — начало повседневной работы по формированию позиции требует анализа инновационных методов управления процессами. Таким образом, сложившаяся структура организации способствует повышению качества соответствующих условий активизации. Прежде всего, глубокий уровень погружения однозначно фиксирует необходимость глубокомысленных рассуждений! Не следует, однако, забывать, что сложившаяся структура организации играет важную роль в формировании новых принципов формирования материально-технической и кадровой базы. Прежде всего, высокотехнологичная концепция общественного уклада создаёт необходимость включения в производственный план целого ряда внеочередных мероприятий с учётом комплекса укрепления моральных ценностей. Каждый из нас понимает очевидную вещь: консультация с широким активом однозначно определяет каждого участника как способного принимать собственные решения касаемо прогресса профессионального сообщества.
+            #     """}
+            # )
 
         except ResponseError:
             raise HTTPException(
@@ -198,4 +248,3 @@ class MessageService:
         finally:
             os.remove(filepath)
             # self.giga.delete_file(file_id=uploaded_file.id_)
-

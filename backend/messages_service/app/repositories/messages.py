@@ -16,6 +16,7 @@ class MessageRepository:
         self.postgres.add(chat)
         await self.postgres.commit()
         return chat
+
     async def upload_file(
             self,
             filename: str,

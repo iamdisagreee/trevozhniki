@@ -3,11 +3,19 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from ...core.dependecies import get_current_user, get_auth_service
-from ...schemas.auth import CreateUser, GetUser as UserSchema, GetUser, ConfirmCode, SendConfirmationCode
+from ...schemas.auth import CreateUser, GetUser as UserSchema, GetUser, ConfirmCode, SendConfirmationCode, \
+    ValidateAuthForm
 from ...services.auths import AuthService
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
+
+@router.post("/validate-auth-form")
+async def create_validate_form(
+        validate_auth: ValidateAuthForm,
+        auth_service: AuthService = Depends(get_auth_service)
+):
+    return await auth_service.validate_auth_form(validate_auth=validate_auth)
 
 @router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 async def create_add_user(
@@ -25,6 +33,7 @@ async def login(
         auth_service: AuthService = Depends(get_auth_service)
 ):
     """ Вход в систему - Получаем access token, а refresh token кладем в о HttpOnly Cookies"""
+
     return await auth_service.login_user(
         username=form_data.username,
         password=form_data.password,
@@ -76,3 +85,8 @@ async def me(
         current_user: GetUser = Depends(get_current_user)
 ):
     return current_user.model_dump()
+
+
+# @router.get('/cookie', response_class=JSONResponse)
+# async def me(request: Request):
+#     return {'refreshToken': request.cookies}
