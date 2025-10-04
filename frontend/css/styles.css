@@ -231,35 +231,17 @@ body {
 
 
 .chat {
-    /* border: 3px solid grey; */
-    /* border-image: linear-gradient(180.00deg, rgba(187.75599670410156, 16.17656707763672, 215.6875, 1),rgba(79.9000473022461, 0, 249.6875, 0.93) 100%) 1; */
     height: calc(100vh - 100px);
     margin: 0 auto;
-    /* max-width: ; */
-    /* display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column; */
     border-radius: 50px;
     position: relative;
-    /* display: flex; */
-    /* justify-content: flex-end; */
-    /* display: flex;
-    flex-direction: column;
-    justify-content: space-around; */
 }
 
 .out {
-    /* padding: 30px 30px 200px 30px;  */
-    /* min-height: calc(100vh - 300px); */
-    /* overflow-y: auto; */
-    max-width: 70% ;
+    max-width: 60% ;
     margin: 0 auto;
-    /* padding-top: 20px; */
+    padding-top: 20px;
     padding-bottom: 200px;
-    /* padding-bottom: 20px; */
-    /* overflow-y: auto; */
-    /* border: 3px solid rgba(187.75599670410156, 16.17656707763672, 215.6875, 1); */
     
     
 }
@@ -286,7 +268,6 @@ body {
     margin: 0 auto;
     max-width: 50%;
     height: 70px;
-    /* justify-content: flex-end; */
     border: 3px solid rgba(187.75599670410156, 16.17656707763672, 215.6875, 1);
     border-radius: 50px;
     display: flex;
