@@ -60,7 +60,6 @@ class GigaChatClient:
         self.token()
         self.create_giga_client()
 
-        print(filepath)
         return self.giga_client.upload_file(
             open(filepath, mode="rb")
         )
@@ -83,7 +82,7 @@ class GigaChatClient:
 
         result = self.giga_client.chat(
             {
-                "model": 'GigaChat-Pro',
+                # "model": 'GIGACHAT_API_PERS',
                 "messages": [
                     {
                         "role": "user",

@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Optional
 
 import aio_pika
@@ -9,7 +10,7 @@ import os
 
 from .logger_config import logger
 from ..config import get_settings
-from .dependecies import get_current_user, get_auth_repository
+from .dependecies import get_current_user, get_auth_repository_no_depends, get_current_user_no_depends, get_postgres
 
 
 async def process_validate_jwt(
@@ -18,22 +19,28 @@ async def process_validate_jwt(
     """ Обрабатывает входящий RPC-запрос на проверку jwt """
     logger.info("Пришел в функцию для обработки jwt")
     async with message.process():
-        response = b'false'
-        # try:
-            # print(str(message.body.decode()))
         token = message.body.decode()
-        response = await get_current_user(
-                token=token,
-                auth_repo=get_auth_repository
-        )
+        try:
+            async for postgres in get_postgres():
+                response = await get_current_user_no_depends(
+                        token=token,
+                        auth_repo=await get_auth_repository_no_depends(postgres=postgres)
+                )
+                json_response = response.model_dump_json(indent=2)
 
-        # except Exception as e:
-        #     print(e)
+        except Exception as e:
+            response = {
+                'status_code': e.status_code,
+                'detail': e.detail
+            }
+            json_response = json.dumps(response)
+
+        logger.info(f"Получили ответ: {json_response} type={type(json_response)}")
 
         if message.reply_to and message.correlation_id:
             await default_exchange.publish(
                 aio_pika.Message(
-                    body=response,
+                    body=json_response.encode(),
                     correlation_id=message.correlation_id
                 ),
                 routing_key=message.reply_to

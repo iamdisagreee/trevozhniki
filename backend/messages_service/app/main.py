@@ -3,15 +3,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, APIRouter
 
 from .api.routers import messages
-from .core.rabbitmq import jwt_validator_instance
+from .core.rabbitmq import rabbitmq_validator_instance
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        await jwt_validator_instance.connect()
+        await rabbitmq_validator_instance.connect()
         yield
-       # await jwt_validator_instance.close()
+       # await rabbitmq_validator_instance.close()
     except Exception as e:
         pass
     finally:

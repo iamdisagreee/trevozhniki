@@ -8,17 +8,17 @@ from ..core.postgres import BaseSchema
 
 
 
-class User(BaseSchema):
-    __tablename__ = 'users'
-
-    id: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        primary_key=True,
-        autoincrement=True
-    )
-
-    files: Mapped[List["File"]] = relationship(back_populates='user')
+# class User(BaseSchema):
+#     __tablename__ = 'users'
+#
+#     id: Mapped[int] = mapped_column(
+#         Integer,
+#         nullable=False,
+#         primary_key=True,
+#         autoincrement=True
+#     )
+#
+#     files: Mapped[List["File"]] = relationship(back_populates='user')
 
 class File(BaseSchema):
     __tablename__ = 'files'
@@ -40,19 +40,46 @@ class File(BaseSchema):
         nullable=False,
     )
 
+    user_id: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    chat_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey(
+            'chats.id',
+            ondelete='cascade'
+        ),
+        nullable=False,
+    )
+
     uploaded_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
         server_default=func.now()
     )
 
-    user_id: Mapped[int] = mapped_column(
+    chat: Mapped["Chat"] = relationship(back_populates='files')
+
+class Chat(BaseSchema):
+    __tablename__ = 'chats'
+
+    id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey(
-            'users.id',
-            ondelete='cascade'
-        ),
-        nullable=False
+        nullable=False,
+        primary_key=True,
+        autoincrement=True
     )
 
-    user: Mapped["User"] = relationship(back_populates='files')
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now()
+    )
+
+
+    files: Mapped[List["File"]] = relationship(back_populates='chat')
+
+
+
