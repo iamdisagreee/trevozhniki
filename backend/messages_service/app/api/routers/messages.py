@@ -50,3 +50,13 @@ async def create_processing_file(
         user=current_user
     )
 
+@router.get("/chats", response_class=JSONResponse)
+async def create_get_all_chats(
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    return await message_service.get_all_chats(
+        user_id=current_user.id
+    )
+
+

@@ -81,7 +81,7 @@ class MessageService:
             username: str
     ):
         time_now = datetime.now()
-        return f"{username}-{file_extension}-{time_now.strftime("%Y.%m.%d-%H:%M")}"
+        return f"{username}-{file_extension}-{time_now.strftime("%Y.%m.%d-%H:%M:%S")}"
 
     @staticmethod
     def file_change_logic(
@@ -122,39 +122,56 @@ class MessageService:
             file: UploadFile,
             user: GetUser,
     ):
-        processed_file = await self.preprocessing_file(file)
-
-        self.check_file_extension(processed_file.filename)
-        self.check_file_content_type(processed_file.content_type)
-        self.check_file_size(processed_file)
-        new_filename = self.generate_filename(
-            file_extension=processed_file.filename.split(".")[-1],
-            username=user.username
-        )
-
-        chat = await self.msg_repo.create_chat()
-        await self.msg_repo.upload_file(
-            filename=new_filename,
-            file_extension=processed_file.filename.split('.')[-1],
-            user_id=user.id,
-            chat_id=chat.id
-        )
-        await self.s3.upload_file(
-            file=processed_file,
-            filename=new_filename
-        )
-
-        return JSONResponse(
-            content={"detail": "File successfully loaded",
-                     "chatId": chat.id,
-                     "filename": new_filename},
-        )
+        # processed_file = await self.preprocessing_file(file)
+        #
+        # self.check_file_extension(processed_file.filename)
+        # self.check_file_content_type(processed_file.content_type)
+        # self.check_file_size(processed_file)
+        # new_filename = self.generate_filename(
+        #     file_extension=processed_file.filename.split(".")[-1],
+        #     username=user.username
+        # )
+        #
+        # chat = await self.msg_repo.create_chat(
+        #     name=new_filename,
+        #     user_id=user.id
+        # )
+        # await self.msg_repo.upload_file(
+        #     filename=new_filename,
+        #     file_extension=processed_file.filename.split('.')[-1],
+        #     user_id=user.id,
+        #     chat_id=chat.id
+        # )
+        # await self.s3.upload_file(
+        #     file=processed_file,
+        #     filename=new_filename
+        # )
+        #
+        # return JSONResponse(
+        #     content={"detail": "File successfully loaded",
+        #              "chatId": chat.id,
+        #              "filename": new_filename},
+        # )
 
         return JSONResponse(
             content={"detail": "File successfully loaded",
                      "chatId": 2,
                      "filename": 'vova-json-2025.09.19-08:09'},
         )
+
+    async def get_all_chats(
+            self,
+            user_id: int
+    ):
+        chats = await self.msg_repo.all_chats(user_id=user_id)
+        return {'chats':
+            [
+                {
+                    'chatId': chat.id,
+                    'name': chat.name
+                } for chat in chats
+            ]
+        }
 
     async def delete_file(
             self,
@@ -192,43 +209,43 @@ class MessageService:
             user: GetUser
     ):
 
-        filepath = await self.s3.get_file(filename=file.filename)
-        uploaded_file = self.giga.upload_file(filepath=filepath)
+        #filepath = await self.s3.get_file(filename=file.filename)
+        # uploaded_file = self.giga.upload_file(filepath=filepath)
         try:
-            response = self.giga.request_processing(file_id=uploaded_file.id_).choices[0].message.content
-            response_text = StringIO(response)
-
-            new_filename = self.generate_filename(
-                file_extension='txt',
-                username=user.username
-            )
-
-            upload_file = UploadFile(
-                file=response_text,
-                filename=new_filename
-            )
-
-            await self.s3.upload_file(
-                file=upload_file,
-                filename=new_filename
-            )
-
-            await self.msg_repo.upload_file(
-                filename=new_filename,
-                file_extension='txt',
-                user_id=user.id,
-                chat_id=file.chat_id
-            )
+            # response = self.giga.request_processing(file_id=uploaded_file.id_).choices[0].message.content
+            # response_text = StringIO(response)
+            #
+            # new_filename = self.generate_filename(
+            #     file_extension='txt',
+            #     username=user.username
+            # )
+            #
+            # upload_file = UploadFile(
+            #     file=response_text,
+            #     filename=new_filename
+            # )
+            #
+            # await self.s3.upload_file(
+            #     file=upload_file,
+            #     filename=new_filename
+            # )
+            #
+            # await self.msg_repo.upload_file(
+            #     filename=new_filename,
+            #     file_extension='txt',
+            #     user_id=user.id,
+            #     chat_id=file.chat_id
+            # )
+            #
+            # return JSONResponse(
+            #     content={'text': response}
+            # )
 
             return JSONResponse(
-                content={'text': response}
+                content={'text': """
+                Есть над чем задуматься: непосредственные участники технического прогресса освещают чрезвычайно интересные особенности картины в целом, однако конкретные выводы, разумеется, ограничены исключительно образом мышления. Сложно сказать, почему некоторые особенности внутренней политики, вне зависимости от их уровня, должны быть описаны максимально подробно. Вот вам яркий пример современных тенденций — начало повседневной работы по формированию позиции требует анализа инновационных методов управления процессами. Таким образом, сложившаяся структура организации способствует повышению качества соответствующих условий активизации. Прежде всего, глубокий уровень погружения однозначно фиксирует необходимость глубокомысленных рассуждений! Не следует, однако, забывать, что сложившаяся структура организации играет важную роль в формировании новых принципов формирования материально-технической и кадровой базы. Прежде всего, высокотехнологичная концепция общественного уклада создаёт необходимость включения в производственный план целого ряда внеочередных мероприятий с учётом комплекса укрепления моральных ценностей. Каждый из нас понимает очевидную вещь: консультация с широким активом однозначно определяет каждого участника как способного принимать собственные решения касаемо прогресса профессионального сообщества.
+                """}
             )
-
-            # return JSONResponse(
-            #     content={'text': """
-            #     Есть над чем задуматься: непосредственные участники технического прогресса освещают чрезвычайно интересные особенности картины в целом, однако конкретные выводы, разумеется, ограничены исключительно образом мышления. Сложно сказать, почему некоторые особенности внутренней политики, вне зависимости от их уровня, должны быть описаны максимально подробно. Вот вам яркий пример современных тенденций — начало повседневной работы по формированию позиции требует анализа инновационных методов управления процессами. Таким образом, сложившаяся структура организации способствует повышению качества соответствующих условий активизации. Прежде всего, глубокий уровень погружения однозначно фиксирует необходимость глубокомысленных рассуждений! Не следует, однако, забывать, что сложившаяся структура организации играет важную роль в формировании новых принципов формирования материально-технической и кадровой базы. Прежде всего, высокотехнологичная концепция общественного уклада создаёт необходимость включения в производственный план целого ряда внеочередных мероприятий с учётом комплекса укрепления моральных ценностей. Каждый из нас понимает очевидную вещь: консультация с широким активом однозначно определяет каждого участника как способного принимать собственные решения касаемо прогресса профессионального сообщества.
-            #     """}
-            # )
 
         except ResponseError:
             raise HTTPException(
@@ -246,5 +263,6 @@ class MessageService:
                 detail=e.detail
             )
         finally:
-            os.remove(filepath)
+            pass
+            # os.remove(filepath)
             # self.giga.delete_file(file_id=uploaded_file.id_)
