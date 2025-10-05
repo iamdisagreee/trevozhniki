@@ -70,3 +70,9 @@ export async function handlingUnathorizedError() {
         window.location.href = "http://127.0.0.1:5500/login.html"
     }
 }
+
+export async function name(callback) {
+    await handlingUnathorizedError()
+    // const accessToken = localStorage.getItem('access_token')
+    return await callback()
+}
