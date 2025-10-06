@@ -30,21 +30,28 @@ async function getAllChats(token) {
     }
 }
 
-let accessToken = localStorage.getItem('access_token')
-let responseChats
+// let accessToken = localStorage.getItem('access_token')
+// let responseChats
+// try {
+//     responseChats = await getAllChats(accessToken)
+// } catch (exception) {
+//     switch (exception.status) {
+//         case 401: {
+//             responseChats = await name(
+//                 () => {
+//                     accessToken = localStorage.getItem('access_token')
+//                     responseChats = getAllChats(accessToken)
+//                 }
+//             )
+//             break
+//         }
+//     }
+// }
+
 try {
-    responseChats = await getAllChats(accessToken)
+    await name(getAllChats)
 } catch (exception) {
-    switch (exception.status) {
-        case 401: {
-            responseChats = await name(
-                () => {
-                    accessToken = localStorage.getItem('access_token')
-                    responseChats = getAllChats(accessToken)
-                }
-            )
-        }
-    }
+    console.log(exception.message)
 }
 
 responseChats.chats.forEach((chat) => {
