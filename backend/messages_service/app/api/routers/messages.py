@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Depends, Header, HTTPException, Security
 from fastapi.responses import JSONResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+# from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from ...core.logging_config import logger
 from ...services.messages import MessageService
@@ -9,8 +9,7 @@ from ...schemas.message import DeleteFile, ProcessingFile, GetUser
 
 router = APIRouter(prefix='/messages', tags=['messages'])
 
-security = HTTPBearer()
-
+# security = HTTPBearer()
 
 @router.post("/uploadfile", response_class=JSONResponse)
 async def create_upload_file(
@@ -34,7 +33,7 @@ async def crete_delete_file(
 
     return await message_service.delete_file(
         file_id=delete_file.id,
-        filename=delete_file.name,
+        filename=delete_file.filename,
     )
 
 
@@ -50,4 +49,14 @@ async def create_processing_file(
         file=processing_file,
         user=current_user
     )
+
+@router.get("/chats", response_class=JSONResponse)
+async def create_get_all_chats(
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    return await message_service.get_all_chats(
+        user_id=current_user.id
+    )
+
 

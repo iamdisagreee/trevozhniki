@@ -91,7 +91,7 @@ class RabbitMQValidator:
         if response_json.get('status_code'):
             raise HTTPException(
                 status_code=response_json.get('status_code'),
-                detail=response_json.get('exception')
+                detail=response_json.get('detail')
             )
         else:
             return GetUser.model_validate(response_json)

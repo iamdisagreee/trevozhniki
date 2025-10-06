@@ -70,3 +70,23 @@ export async function handlingUnathorizedError() {
         window.location.href = "http://127.0.0.1:5500/login.html"
     }
 }
+
+export async function name(callback) {
+    let accessToken
+    let response 
+    // ess_token
+    try {
+        accessToken = localStorage.getItem('access_token')
+        response = await callback(accessToken)
+    } catch (exception) {
+        if (exception.status == 401) {
+            await handlingUnathorizedError()
+            accessToken = localStorage.getItem('access_token')
+            response = await callback(accessToken)
+            return response
+        }
+        else {
+            throw exception
+        }
+    }
+}

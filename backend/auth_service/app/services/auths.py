@@ -14,6 +14,7 @@ import redis.asyncio as aioredis
 from ..config import Settings
 from ..repositories.auths import AuthRepository
 from ..schemas.auth import CreateUser, ValidateAuthForm
+from ..core.logger_config import logger
 
 
 class AuthService:
@@ -68,9 +69,12 @@ class AuthService:
             detail='Could not validate refresh token',
             headers={'WWW-Authenticate': "Bearer"}
         )
+        # logger.info(f'Refresh token: {refresh_token}')
         try:
             payload = jwt.decode(refresh_token, self.settings.jwt_secret_key, algorithms=[self.settings.jwt_algorithm])
             user_id = payload.get('sub')
+            # logger.info(f'Payload token: {payload}')
+
             if user_id is None:
                 raise credentials_exception
 
@@ -109,10 +113,17 @@ class AuthService:
             password: str,
     ):
         user = await self.auth_repo.get_user_by_username(username=username)
-        if not user or not self.verify_password(password, user.hashed_password):
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail='Incorrect username or password',
+                detail='Incorrect username',
+                headers={'WWW-Authentication': "Bearer"}
+            )
+
+        if not self.verify_password(password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Incorrect password',
                 headers={'WWW-Authentication': "Bearer"}
             )
 
@@ -133,8 +144,8 @@ class AuthService:
 
         response = JSONResponse(
             content={
-                "accessToken": access_token,
-                "tokenType": "Bearer"
+                "access_token": access_token,
+                "token_type": "Bearer"
             }
         )
 
@@ -170,16 +181,15 @@ class AuthService:
         user_by_email = await self.auth_repo.get_user_by_email(email=validate_auth.email)
         user_by_username = await self.auth_repo.get_user_by_username(username=validate_auth.username)
 
-        if user_by_username is not None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username already registered"
-            )
-
         if user_by_email is not None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered"
+            )
+        if user_by_username is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already registered"
             )
 
         return JSONResponse(
@@ -253,13 +263,20 @@ class AuthService:
         text_header = 'Код подтверждения'
         auth_code = randint(100000, 999999)
         text_body = f'Ваш код: {auth_code}'
-        await self.send_email(
-            from_email=self.settings.mail_user,
-            from_password=self.settings.mail_password,
-            to_email=to_email,
-            header=text_header,
-            body=text_body
-        )
+
+        try:
+            await self.send_email(
+                from_email=self.settings.mail_user,
+                from_password=self.settings.mail_password,
+                to_email=to_email,
+                header=text_header,
+                body=text_body
+            )
+        except smtplib.SMTPAuthenticationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail='Mistake with authorization in smtp service'
+            )
 
         # Добавляем в redis-хранилище email:auth_code
         await self.redis.set(to_email, auth_code)

@@ -1,7 +1,7 @@
 import { handlingUnathorizedError } from './token.js'
+import { header } from './templates.js'
 
-
-
+const headerLink = document.querySelector('.header').innerHTML = header
 const formChat = document.querySelector('.form__chat')
 const formChatFile = document.querySelector('.form__chat-file')
 const formChatStatus = document.querySelector('.form__chat-status')

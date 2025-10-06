@@ -72,6 +72,16 @@ class Chat(BaseSchema):
         autoincrement=True
     )
 
+    name: Mapped[str] = mapped_column(
+        String,
+        nullable=False
+    )
+
+    user_id: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,

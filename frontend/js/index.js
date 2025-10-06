@@ -1,6 +1,8 @@
+import { header } from './templates.js'
+
+const headerLink = document.querySelector('.header').innerHTML = header
 const processingLink = document.querySelector('#processing__link')
 const storageLink = document.querySelector('#storage__link')
-
 // console.log(processingLink)
 
 processingLink.addEventListener('click', async (event) => {

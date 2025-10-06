@@ -7,10 +7,10 @@ class CamelCaseModel(BaseModel):
         from_attributes=True
     )
 class File(CamelCaseModel):
-    name: str = Field(pattern='[a-z]+-'
-                              '(json|txt)-'
-                              '20[2-9][0-9].(0[1-9]|1[0-2]).([1-9]|1[0-9]|2[0-9]|3[0-1])-'
-                              '([0-1][0-9]|2[0-3]):[0-5][0-9]')
+    filename: str #= Field(pattern='[a-z]+1-'
+                   #           '(json|txt)-'
+                   #           '20[2-9][0-9].(0[1-9]|1[0-2]).([1-9]|1[0-9]|2[0-9]|3[0-1])-'
+                      #        '([0-1][0-9]|2[0-3]):[0-5][0-9]')
 
 class DeleteFile(File):
     id: int = Field(gt=0)
