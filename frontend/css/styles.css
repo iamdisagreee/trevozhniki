@@ -337,7 +337,7 @@ body {
     display: none;
 }
 
-/* --------------------------------------Storage.html-------------------------------------------------- */
+/* --------------------------------------storage.html-------------------------------------------------- */
 
 .storage {
     /* min-width: 10; */
@@ -359,9 +359,28 @@ body {
 
 .storage__item-text {
     width: 80%;
+    border: 1px solid black;
 }
 
+.storage__item-link {
+    border: 1px solid grey;
+    font-size: 20px
+}
+
+
+.storage__item-remove {
+    border: 1px solid grey;
+    font-size: 20px
+}
  
+/* -------------------------------------------- storage-item.html--------------------------------------------------- */
+
+.out__result {
+    max-width: 60% ;
+    margin: 0 auto;
+    padding-top: 20px;
+    padding-bottom: 200px;
+}
 
  
 

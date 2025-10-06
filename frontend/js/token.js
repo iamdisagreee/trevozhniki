@@ -71,22 +71,17 @@ export async function handlingUnathorizedError() {
     }
 }
 
-export async function name(callback) {
+export async function requestToAPI(callback) {
     let accessToken
-    let response 
-    // ess_token
     try {
         accessToken = localStorage.getItem('access_token')
-        response = await callback(accessToken)
+        return await callback(accessToken)
     } catch (exception) {
         if (exception.status == 401) {
             await handlingUnathorizedError()
             accessToken = localStorage.getItem('access_token')
-            response = await callback(accessToken)
-            return response
+            return await callback(accessToken)
         }
-        else {
-            throw exception
-        }
+        throw exception
     }
 }
