@@ -82,6 +82,15 @@ class Chat(BaseSchema):
         nullable=False
     )
 
+    # file_id: Mapped[int] = mapped_column(
+    #     Integer,
+    #     ForeignKey(
+    #         'files.id',
+    #         ondelete='cascade'
+    #     ),
+    #     nullable=False,
+    # )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
@@ -89,7 +98,7 @@ class Chat(BaseSchema):
     )
 
 
-    files: Mapped[List["File"]] = relationship(back_populates='chat')
+    files: Mapped[list[File]] = relationship(back_populates='chat')
 
 
 

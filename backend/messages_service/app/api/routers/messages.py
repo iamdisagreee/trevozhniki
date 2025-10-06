@@ -59,4 +59,22 @@ async def create_get_all_chats(
         user_id=current_user.id
     )
 
+@router.get("/chats/{chat_id}", response_class=JSONResponse)
+async def create_get_chat_by_id(
+        chat_id: int,
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    return await message_service.get_chat_by_id(chat_id=chat_id)
+
+@router.delete("/chats/{chat_id}", response_class=JSONResponse)
+async def create_delete_chat_by_id(
+        chat_id: int,
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    return await message_service.delete_chat(
+        chat_id=chat_id
+    )
+
 

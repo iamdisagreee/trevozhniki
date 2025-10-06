@@ -1,5 +1,6 @@
 import asyncio
 import json
+from logging import exception
 from pyexpat.errors import messages
 
 import aiofiles
@@ -85,19 +86,18 @@ class MessageService:
 
     @staticmethod
     def file_change_logic(
-        file_json: dict
+            file_json: dict
     ):
         new_file = {
             'messages': list(
                 map(
-                lambda msg: {'from': msg['from'], 'text': msg['text']},
-                filter(lambda msg: not msg.get('mime_type'), file_json['messages'])
+                    lambda msg: {'from': msg['from'], 'text': msg['text']},
+                    filter(lambda msg: not msg.get('mime_type'), file_json['messages'])
                 )
             )
         }
         # print(new_file)
         return new_file
-
 
     async def preprocessing_file(
             self,
@@ -114,7 +114,7 @@ class MessageService:
         return UploadFile(
             filename=file.filename,
             headers=file.headers,
-            file=BytesIO(processed_bytes) # Создаем файло-подобное отродие, то есть где есть метод read() и т.д.
+            file=BytesIO(processed_bytes)  # Создаем файло-подобное отродие, то есть где есть метод read() и т.д.
         )
 
     async def upload_file(
@@ -122,36 +122,38 @@ class MessageService:
             file: UploadFile,
             user: GetUser,
     ):
-        # processed_file = await self.preprocessing_file(file)
-        #
-        # self.check_file_extension(processed_file.filename)
-        # self.check_file_content_type(processed_file.content_type)
-        # self.check_file_size(processed_file)
-        # new_filename = self.generate_filename(
-        #     file_extension=processed_file.filename.split(".")[-1],
-        #     username=user.username
-        # )
-        #
-        # chat = await self.msg_repo.create_chat(
-        #     name=new_filename,
-        #     user_id=user.id
-        # )
-        # await self.msg_repo.upload_file(
-        #     filename=new_filename,
-        #     file_extension=processed_file.filename.split('.')[-1],
-        #     user_id=user.id,
-        #     chat_id=chat.id
-        # )
-        # await self.s3.upload_file(
-        #     file=processed_file,
-        #     filename=new_filename
-        # )
-        #
-        # return JSONResponse(
-        #     content={"detail": "File successfully loaded",
-        #              "chatId": chat.id,
-        #              "filename": new_filename},
-        # )
+        processed_file = await self.preprocessing_file(file)
+
+        self.check_file_extension(processed_file.filename)
+        self.check_file_content_type(processed_file.content_type)
+        self.check_file_size(processed_file)
+        new_filename = self.generate_filename(
+            file_extension=processed_file.filename.split(".")[-1],
+            username=user.username
+        )
+
+        chat = await self.msg_repo.create_chat(
+            name=new_filename,
+            user_id=user.id,
+        )
+
+        await self.msg_repo.upload_file(
+            filename=new_filename,
+            file_extension=processed_file.filename.split('.')[-1],
+            user_id=user.id,
+            chat_id=chat.id
+        )
+
+        await self.s3.upload_file(
+            file=processed_file,
+            filename=new_filename
+        )
+
+        return JSONResponse(
+            content={"detail": "File successfully loaded",
+                     "chatId": chat.id,
+                     "filename": new_filename},
+        )
 
         return JSONResponse(
             content={"detail": "File successfully loaded",
@@ -164,14 +166,61 @@ class MessageService:
             user_id: int
     ):
         chats = await self.msg_repo.all_chats(user_id=user_id)
-        return {'chats':
+        chats_json = {'chats':
             [
                 {
-                    'chatId': chat.id,
+                    'id': chat.id,
                     'name': chat.name
                 } for chat in chats
             ]
         }
+        return JSONResponse(
+            content=chats_json
+        )
+
+    async def delete_chat(
+            self,
+            chat_id: int
+    ):
+        result_postgres = await self.msg_repo.delete_chat(chat_id=chat_id)
+        if not result_postgres.rowcount:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='There is no chat with such id'
+            )
+
+        # ЛОГИКА УДАЛЕНИЯ ВСЕХ ФАЙЛОВ ИЗ S3...................
+
+        return JSONResponse(
+            content={'detail': "Chat successfully deleted"}
+        )
+
+    async def get_chat_by_id(
+            self,
+            chat_id: int):
+        chat = await self.msg_repo.get_chat_by_id(chat_id=chat_id)
+
+        if chat is None:
+            raise HTTPException(
+                detail='There is no chat with such id',
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        answer_name = chat.files[1].name
+        try:
+            filepath = await self.s3.get_file(answer_name)
+        except Exception as e:
+            # print(e, type(e))
+            raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=e.kwargs.get('msg')
+            )
+
+        async with aiofiles.open(filepath, mode='r', encoding='utf-8') as file:
+            text = await file.read()
+
+        return JSONResponse(
+            content={'text': text}
+        )
 
     async def delete_file(
             self,
@@ -209,37 +258,37 @@ class MessageService:
             user: GetUser
     ):
 
-        #filepath = await self.s3.get_file(filename=file.filename)
-        # uploaded_file = self.giga.upload_file(filepath=filepath)
+        filepath = await self.s3.get_file(filename=file.filename)
+        uploaded_file = self.giga.upload_file(filepath=filepath)
         try:
-            # response = self.giga.request_processing(file_id=uploaded_file.id_).choices[0].message.content
-            # response_text = StringIO(response)
-            #
-            # new_filename = self.generate_filename(
-            #     file_extension='txt',
-            #     username=user.username
-            # )
-            #
-            # upload_file = UploadFile(
-            #     file=response_text,
-            #     filename=new_filename
-            # )
-            #
-            # await self.s3.upload_file(
-            #     file=upload_file,
-            #     filename=new_filename
-            # )
-            #
-            # await self.msg_repo.upload_file(
-            #     filename=new_filename,
-            #     file_extension='txt',
-            #     user_id=user.id,
-            #     chat_id=file.chat_id
-            # )
-            #
-            # return JSONResponse(
-            #     content={'text': response}
-            # )
+            response = self.giga.request_processing(file_id=uploaded_file.id_).choices[0].message.content
+            response_text = StringIO(response)
+
+            new_filename = self.generate_filename(
+                file_extension='txt',
+                username=user.username
+            )
+
+            upload_file = UploadFile(
+                file=response_text,
+                filename=new_filename
+            )
+
+            await self.s3.upload_file(
+                file=upload_file,
+                filename=new_filename
+            )
+
+            await self.msg_repo.upload_file(
+                filename=new_filename,
+                file_extension='txt',
+                user_id=user.id,
+                chat_id=file.chat_id
+            )
+
+            return JSONResponse(
+                content={'text': response}
+            )
 
             return JSONResponse(
                 content={'text': """
