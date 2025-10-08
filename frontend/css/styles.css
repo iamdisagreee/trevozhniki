@@ -95,7 +95,7 @@ body {
     border-image: linear-gradient(180.00deg, rgba(187.75599670410156, 16.17656707763672, 215.6875, 1),rgba(79.9000473022461, 0, 249.6875, 0.93) 100%) 1;
 }
 
-.form__auth-mistake{
+.form__auth-error{
     text-align: center;
     color: red;
 }
