@@ -7,4 +7,8 @@ export class Model {
         this.api = new ApiService()
         this.token = new TokenService()
     }
+
+    serializeForm(formLogin) {
+        return new FormData(formLogin)
+    }
 }

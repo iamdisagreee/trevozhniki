@@ -1,8 +1,11 @@
 import { ApiService } from '../services/apiService.js'
+import { TokenService } from '../services/tokenService.js'
+
 
 export class Model {
     constructor() {
         this.api = new ApiService()
+        this.token = new TokenService()
     }
 
     serializeForm(authForm) {
@@ -58,19 +61,19 @@ export class Model {
     }
 
     async confirmCode(body) {
-        try{
+        try {
             await this.api.request(
-                    'http://127.0.0.1:8001/api/v1/auth/confirm-code', 
-                    {
-                        method: 'POST',
-                        body: JSON.stringify(body),
-                        headers: 
-                        {   
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                    }
-            )            
+                'http://127.0.0.1:8001/api/v1/auth/confirm-code', 
+                {
+                    method: 'POST',
+                    body: JSON.stringify(body),
+                    headers: 
+                    {   
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                }
+        )            
         } catch (error) {
             throw error
         }    
@@ -95,5 +98,11 @@ export class Model {
         }     
     }
 
+    async loginUser(validatedAuthForm) {
+        const formData = new FormData()
+        formData.set('username', validatedAuthForm.email)
+        formData.set('password', validatedAuthForm.password)
+        await this.token.loginn(formData)
+    }
     
 }

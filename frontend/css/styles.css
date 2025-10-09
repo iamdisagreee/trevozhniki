@@ -66,7 +66,7 @@ body {
 
 
 .form__auth {
-    display: none;
+    display: flex;
     flex-direction: column;
     position: fixed;
     width: 400px;
@@ -100,26 +100,9 @@ body {
     color: red;
 }
 
-/* .confirm {
-    position: fixed;
-    margin: 0;
-    width: 400px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.confirm::backdrop {
-    background-color: rgb(0 0 0 / 0.8);
-}
-
-.scroll-block {
-    overflow: hidden;
-} */
-
 
 .form__code {
-    display: none;
+    display: flex;
     flex-direction: column;
     position: fixed;
     justify-content: center;
@@ -151,14 +134,14 @@ body {
     margin-bottom: 10px;
 }
 
-.form__code-mistake {
+.form__code-error {
     text-align: center;
     color: red;
 }
 
-.form__inner--active {
+/* .form__inner--active {
     display: flex;
-}
+} */
 
  /*  ---------------------------login.html------------------------------------------ */
 
@@ -188,7 +171,7 @@ body {
     margin-bottom: 10px;
 }
 
-.form__login-mistake {
+.form__login-error {
     text-align: center;
     color: red;
 }

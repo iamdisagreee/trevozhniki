@@ -6,6 +6,8 @@ export class ApiService {
             const response = await fetch(url, options)
 
             const data = await response.json()
+            
+            console.log(data.detail)
 
             if (!response.ok){
                 const error = new Error(`${response.status} ${data.detail}`)

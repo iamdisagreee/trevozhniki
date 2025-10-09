@@ -11,19 +11,19 @@
     <main class="auth">
         <section class="form">
             <div class="container">
-                <form class="form__auth form__inner--active">
+                <form class="form__auth">
                     <div class="form__auth-item">
                         <label>Почта</label>
-                        <input class="form__auth-input" name="email" type="email"  value="vavakharitonov2004@gmail.com" required>
+                        <input class="form__auth-input" name="email" type="email"  value="vakharitonov2004@gmail.com" required>
                     </div>
-                    <div class="form__auth-item">
+                    <!-- <div class="form__auth-item">
                         <label>Логин</label>
                         <input class="form__auth-input" name="username" type="text" value="index1" required>
-                    </div>
-                    <div class="form__auth-item">
+                    </div> -->
+                    <!-- <div class="form__auth-item">
                         <label>Имя</label>
                         <input class="form__auth-input" name="firstname" type="text" value="index2" required>
-                    </div>
+                    </div> -->
                     <div class="form__auth-item">
                         <label>Пароль</label>
                         <input class="form__auth-input" name="password" type="password" value="index3" required>
@@ -34,9 +34,7 @@
                     <button class="form__auth-login" type="button">
                         У меня есть аккаунт
                     </button>
-                    <div class="form__auth-error hidden">
-                        <span class="form__auth-mistake"> Почта уже зарегистрирована!</span>
-                    </div>
+                    <span class="form__auth-error hidden"> Почта уже зарегистрирована!</span>
                 </form>
                 <!-- <dialog class="confirm">
                     <div class="confirm__inner">
@@ -46,11 +44,12 @@
                         </button>
                     </div>
                 </dialog> -->
-                <form class="form__code">
+                <form class="form__code hidden">
                     <h3 class="form__code-title">Подтверждение кода</h3>
                     <input class="form__code-input" type="text" name="enteredCode" placeholder="Введите код"
-                    minlength="6" maxlength="6" required>
+                     minlength="6" maxlength="6" required>
                     <button class="form__code-btn" type="submit"> Проверить</button>
+                    <span class="form__code-error hidden"> Неправильный код!</span>
                 </form>
             </div>
         </section>

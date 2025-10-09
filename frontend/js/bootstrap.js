@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             break
         }
         case 'login': {
-            const loginModule = await import ('./controllers/logibController.js')
+            const loginModule = await import ('./controllers/loginController.js')
             loginModule.initController()
             break
         }
