@@ -22,7 +22,6 @@ function handlingTokenProcessing(event) {
     )
 }
 
-
 function handlingTokenStorage() {
     view.catchNoAccessToken(
         model.token.accessToken,

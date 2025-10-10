@@ -68,21 +68,21 @@ export class TokenService{
             const data = await this.refreshToken()
             this.setAccessToken(data)  
         }
-        catch (exception) {
-            console.log(exception.message)
+        catch (error) {
+            console.log(error.message)
             window.location.href = "http://127.0.0.1:5500/login.html"
         }
     }
 
-    async requestToAPI(callback) {
+    async authorizedRequestToAPI(callback) {
         try {
-            return await callback(this.accessToken)
-        } catch (exception) {
-            if (exception.status == 401) {
+            return await callback()
+        } catch (error) {
+            if (error.status == 401) {
                 await this.handlingUnathorizedError()
-                return await callback(this.accessToken)
+                return await callback()
             }
-            throw exception
+            throw error
         }
     }
 }

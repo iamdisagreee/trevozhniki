@@ -5,7 +5,6 @@ const headerLink = document.querySelector('.header').innerHTML = header
 const formChat = document.querySelector('.form__chat')
 const formChatFile = document.querySelector('.form__chat-file')
 const formChatStatus = document.querySelector('.form__chat-status')
-// const formChatFileChange = document.querySelector('.form__chat-file-change')
 const formChatBtn = document.querySelector('.form__chat-btn')
 const formChatBtnSvg = document.querySelector('.form__chat-btn-svg')
 const loader = document.querySelector('.loader')
@@ -14,7 +13,6 @@ const out = document.querySelector('.out')
 formChat.addEventListener('submit', preventHandlingFormFile)
 formChatFile.addEventListener('change', addFilename)
 
-// const chat = document.querySelector('.chat')
 
 
 
@@ -188,7 +186,7 @@ function addFilename(){
     if (formChatFile.files.length > 0){
         formChatStatus.textContent = formChatFile.files[0].name
         formChatBtnSvg.classList.add('form__chat-btn-svg--active')
-    }
+    }x
 }
 
 

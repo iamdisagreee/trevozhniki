@@ -275,7 +275,7 @@ body {
     margin-right: 15px;
 }
 
-.form__chat-btn-svg--active {
+.form__chat-btn-svg.active {
     fill: green;
 }
 
