@@ -1,0 +1,96 @@
+from fastapi import APIRouter, UploadFile, File, Depends, Header, HTTPException, Security
+from fastapi.responses import JSONResponse
+# from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from ...core.logging_config import logger
+from ...services.messages import MessageService
+from ...core.dependecies import get_message_service, get_current_user
+from ...schemas.message import DeleteFile, ProcessingFile, GetUser
+
+router = APIRouter(prefix='/messages', tags=['messages'])
+
+# security = HTTPBearer()
+
+@router.post("/uploadfile", response_class=JSONResponse)
+async def create_upload_file(
+        file: UploadFile = File(...),
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    """ Загрузка json-файла в s3, postgres"""
+    return await message_service.upload_file(
+        file=file,
+        user=current_user
+    )
+
+@router.delete("/deletefile", response_class=JSONResponse)
+async def crete_delete_file(
+        delete_file: DeleteFile,
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    """ Удаление json-файла из s3, postgres"""
+
+    return await message_service.delete_file(
+        file_id=delete_file.id,
+        filename=delete_file.filename,
+    )
+
+
+@router.post("/processingfile", response_class=JSONResponse)
+async def create_processing_file(
+        processing_file: ProcessingFile,
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    """ Запрос для обработки json-файла с помощью GigaChat API"""
+
+    return await message_service.create_request_gigachat(
+        file=processing_file,
+        user=current_user
+    )
+
+@router.get("/chats", response_class=JSONResponse)
+async def create_get_all_chats(
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    return await message_service.get_all_chats(
+        user_id=current_user.id
+    )
+
+@router.get("/limit-chats", response_class=JSONResponse)
+async def create_get_limit_chats(
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    return await message_service.get_limit_chats(
+        user_id=current_user.id
+    )
+
+@router.patch("/reload-last-chat-id", response_class=JSONResponse)
+async def create_reload_last_chat_id(
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    return await message_service.reload_last_chat_id(user_id=current_user.id)
+
+@router.get("/chats/{chat_id}", response_class=JSONResponse)
+async def create_get_chat_by_id(
+        chat_id: int,
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    return await message_service.get_chat_by_id(chat_id=chat_id)
+
+@router.delete("/chats/{chat_id}", response_class=JSONResponse)
+async def create_delete_chat_by_id(
+        chat_id: int,
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    return await message_service.delete_chat(
+        chat_id=chat_id
+    )
+
+
