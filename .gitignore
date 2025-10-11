@@ -1,9 +1,0 @@
-.env
-.mypy_cache/
-venv/
-__pycache__
-docker_info/
-!docker_info/nats/config/server.conf
-.idea
-backend/messages_service/app/static/*
-backend/messages_service/venv/*
