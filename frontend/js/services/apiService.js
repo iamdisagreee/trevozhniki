@@ -7,8 +7,6 @@ export class ApiService {
 
             const data = await response.json()
             
-            console.log('RESPONSE:', data)
-
             if (!response.ok){
                 const error = new Error(`${response.status} ${data.detail}`)
                 error.status = response.status

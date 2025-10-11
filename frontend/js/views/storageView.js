@@ -1,26 +1,30 @@
 export class View {
-    constructor() {}
+    constructor(jsonChats) {
+        this.listChats = jsonChats.chats 
+    }
 
     elements = {
         storage: document.querySelector('.storage'),
-        fragment: document.createDocumentFragment()
     }
 
-    renderPage(responseStorage, onDeleteChat) {
-        responseStorage.chats.forEach((chat) => {
+    renderPage(onDeleteChat) {
+        this.elements.storage.innerHTML = ''
+        const fragment = document.createDocumentFragment()
+
+        this.listChats.forEach((chat) => {
             const li = document.createElement('li')
             li.className = 'storage__item'
             li.innerHTML = `
-            <a href="storage-item.html?id=${chat.id}" class="storage__item-text">${chat.name}</a>
-            <button class="storage__item-remove" data-id=${chat.id}>Удалить</button></li>`
+                <a href="storage-item.html?id=${chat.id}" class="storage__item-text">${chat.name}</a>
+                <button class="storage__item-remove" data-id=${chat.id}>Удалить</button></li>`
             
             const removeButton = li.querySelector('.storage__item-remove')
             removeButton.addEventListener('click', (event) => onDeleteChat(event))
 
-            this.elements.fragment.appendChild(li)
+            fragment.appendChild(li)
         })
 
-        this.elements.storage.appendChild(this.elements.fragment)
+        this.elements.storage.appendChild(fragment)
     }
 
     deleteStorageItem(button) {

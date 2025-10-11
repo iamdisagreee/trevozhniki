@@ -343,6 +343,8 @@ body {
 .storage__item-text {
     width: 80%;
     border: 1px solid black;
+    font-size: 30px;
+    height: 100px;
 }
 
 .storage__item-link {
