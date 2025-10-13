@@ -19,10 +19,12 @@ class MessageRepository:
     async def create_chat(
             self,
             name: str,
+            interlocutor: str,
             user_id: int,
     ):
         chat = Chat(
             name=name,
+            interlocutor=interlocutor,
             user_id=user_id,
         )
         self.postgres.add(chat)
@@ -82,7 +84,7 @@ class MessageRepository:
         result = await self.postgres.scalars(
             select(Chat)
             .where(Chat.user_id == user_id, Chat.id > subquery)
-            .limit(10)
+            .limit(20)
         )
 
         return result.all()

@@ -96,8 +96,11 @@ class MessageService:
                 )
             )
         }
-        # print(new_file)
         return new_file
+
+    @staticmethod
+    def get_interlocutor(file_json: dict):
+        return file_json['name'].split()[0]
 
     async def preprocessing_file(
             self,
@@ -106,8 +109,12 @@ class MessageService:
         raw_bytes = await file.read()
         file_json = json.loads(raw_bytes.decode('utf-8'))
         # print(len(str(file_json)))
+
         new_file = json.dumps(self.file_change_logic(file_json))
         # print(len(str(new_file)))
+
+        interlocutor = self.get_interlocutor(file_json)
+
 
         processed_bytes = new_file.encode('utf-8')
 
@@ -115,7 +122,7 @@ class MessageService:
             filename=file.filename,
             headers=file.headers,
             file=BytesIO(processed_bytes)  # Создаем файло-подобное отродие, то есть где есть метод read() и т.д.
-        )
+        ), interlocutor
 
     async def upload_file(
             self,
@@ -126,7 +133,7 @@ class MessageService:
         # self.check_file_content_type(file.content_type)
         # self.check_file_size(file)
 
-        processed_file = await self.preprocessing_file(file)
+        processed_file, interlocutor = await self.preprocessing_file(file)
 
         new_filename = self.generate_filename(
             file_extension=processed_file.filename.split(".")[-1],
@@ -135,6 +142,7 @@ class MessageService:
 
         chat = await self.msg_repo.create_chat(
             name=new_filename,
+            interlocutor=interlocutor,
             user_id=user.id,
         )
 
@@ -144,7 +152,7 @@ class MessageService:
             filename=new_filename,
             file_extension=processed_file.filename.split('.')[-1],
             user_id=user.id,
-            chat_id=chat.id
+            chat_id=chat.id,
         )
 
         # await self.s3.upload_file(
@@ -196,7 +204,8 @@ class MessageService:
             [
                 {
                     'id': chat.id,
-                    'name': chat.name
+                    'interlocutor': chat.interlocutor,
+                    'createdAt': chat.created_at.isoformat()
                 } for chat in chats_limit
             ]
         }

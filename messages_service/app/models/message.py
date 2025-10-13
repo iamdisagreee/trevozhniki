@@ -79,6 +79,11 @@ class Chat(BaseSchema):
         nullable=False
     )
 
+    interlocutor: Mapped[str] = mapped_column(
+        String,
+        nullable=False
+    )
+
     user_id: Mapped[int] = mapped_column(
         Integer,
         nullable=False
