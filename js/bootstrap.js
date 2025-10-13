@@ -2,7 +2,7 @@ import { renderAppHeader } from './components/appHeader.js'
 
 document.addEventListener('DOMContentLoaded', async () => {
     const page = document.body.dataset.page
-    renderAppHeader()
+    // renderAppHeader()
 
     switch (page) {
         case 'index': {

@@ -33,11 +33,14 @@ export class Model {
         }
     }
 
-    async getAdditionalChats() {
-        const documentCurrentSize = document.documentElement.getBoundingClientRect()
+    async getAdditionalChats(storage) {
+        // const documentC  urrentSize = document.documentElement.getBoundingClientRect()
+        // const currentSizeNav = nav.getBoundingClientRect()
+        const currentSizeNav = storage.getBoundingClientRect()
         const clientHeight = document.documentElement.clientHeight
 
-        if (documentCurrentSize.bottom < clientHeight + 50) {
+        console.log(currentSizeNav, clientHeight)
+        if (currentSizeNav.bottom < clientHeight + 100) {
             try {
                 return await this.authorizedGetLimitChats()
             }

@@ -13,15 +13,16 @@ export async function initController() {
 }
 
 function addEventListener() {
-    window.addEventListener('scroll', loadingByScroll)
+    view.elements.nav.addEventListener('scroll', loadingByScroll)
     window.addEventListener('beforeunload', goBackBeginingStorage)
 }
 
 async function loadingByScroll() {
     let additionalChats
-    
+    // console.log("AA")
     try {
-        additionalChats = await model.getAdditionalChats()
+        const storage = view.elements.storage
+        additionalChats = await model.getAdditionalChats(storage)
     } catch (error) {
         console.error(error.message)
         return
