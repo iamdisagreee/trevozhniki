@@ -28,8 +28,10 @@ async function loadingByScroll() {
     }
 
     if (additionalChats.chats) {
+        // view.removeHiddenFromLoad()
         view.listChats.push(...additionalChats.chats)
-        // console.log(view.listChats)
+        // setTimeout( () => {console.log("I am sleep fo 5 seconds")}, 5000)
+        // view.addHiddenFromLoad()
     }
     
     view.renderPage(onDeleteChat)
@@ -37,11 +39,11 @@ async function loadingByScroll() {
 }
 
 async function goBackBeginingStorage() {
-    console.log("AAAA")
+    // console.log("AAAA")
     try {
         await model.authorizedReloadLastChatId()
     } catch (error) {
-        console.error(error.message)
+        console.error(error)
         return
     }
 }

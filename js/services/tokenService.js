@@ -82,6 +82,7 @@ export class TokenService{
                 await this.handlingUnathorizedError()
                 return await callback()
             }
+            // console.log('ЗДЕСЬ', error.status)
             throw error
         }
     }

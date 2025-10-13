@@ -5,6 +5,7 @@ export class View {
 
     elements = {
         storage: document.querySelector('.storage'),
+        loader: document.querySelector('.loader')
     }
 
     renderPage(onDeleteChat) {
@@ -25,6 +26,14 @@ export class View {
         })
 
         this.elements.storage.appendChild(fragment)
+    }
+
+    removeHiddenFromLoad() {
+        this.elements.loader.classList.remove('hidden')
+    }
+
+    addHiddenFromLoad() {
+        this.elements.loader.classList.add('hidden')
     }
 
     deleteStorageItem(button) {

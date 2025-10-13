@@ -178,7 +178,7 @@ body {
 
  /*  ---------------------------index.html------------------------------------------ */
 
-.nav {
+/* .nav {
     display: flex;
     align-items: center;
     justify-content:space-between;
@@ -192,9 +192,9 @@ body {
 
 .menu__link {
     font-size: 20px;
-}
+} */
 
-.logo-img {
+/* .logo-img {
     width: 50px;
     height: 50px;
 }
@@ -202,7 +202,7 @@ body {
 .home-img {
     width: 50px;
     height: 50px;
-}
+} */
 
 .top__title {
     position: fixed;
@@ -322,20 +322,14 @@ body {
 
 /* --------------------------------------storage.html-------------------------------------------------- */
 
-.storage {
-    /* min-width: 10; */
+/* .storage {
     display: flex;
     flex-direction: column;
-    /* justify-content:space-between; */
-    /* align-items: center; */
-
-    /* width: 60%; */
 }
 
 .storage__item {
     display: flex;
     min-width: 80%;
-    /* border: 1px solid black; */
     justify-content:space-around;
     align-items: center;
 }
@@ -356,7 +350,7 @@ body {
 .storage__item-remove {
     border: 1px solid grey;
     font-size: 20px
-}
+} */
  
 /* -------------------------------------------- storage-item.html--------------------------------------------------- */
 
@@ -370,8 +364,12 @@ body {
  
 
 
+/* -------------------------------------------- template.html ------------------------------------------------- */
 
-
-
-
+.nav {
+    position: fixed;
+    width: 300px;
+    height: 100%;
+    background-color: grey;
+}
 

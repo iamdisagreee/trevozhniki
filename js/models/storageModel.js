@@ -37,7 +37,7 @@ export class Model {
         const documentCurrentSize = document.documentElement.getBoundingClientRect()
         const clientHeight = document.documentElement.clientHeight
 
-        if (documentCurrentSize.bottom < clientHeight + 150) {
+        if (documentCurrentSize.bottom < clientHeight + 50) {
             try {
                 return await this.authorizedGetLimitChats()
             }
@@ -55,11 +55,14 @@ export class Model {
                 `http://127.0.0.1:8002/api/v1/messages/reload-last-chat-id`,
                 {
                 method: 'PATCH',
+                body: JSON.stringify({}),
                 headers: 
                     {   
-                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        // 'Accept': 'application/json',
                         'Authorization': `Bearer ${this.token.accessToken}`
                     },
+                keepalive: true
                 }
             )
         } catch (error) {
