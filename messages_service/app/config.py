@@ -11,7 +11,6 @@ class Settings(BaseSettings):
     postgres_connect: Optional[str] = None
     gigachat_client_id: Optional[str] = None
     gigachat_client_secret: Optional[str] = None
-    gigachat_authorization_key : Optional[str] = None
     amqp_url: Optional[str] = None
 
     model_config = SettingsConfigDict(

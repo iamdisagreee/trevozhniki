@@ -17,7 +17,7 @@ services:
 #      POSTGRES_USER: ${POSTGRES_USER}
 #      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - 5432:5432
+      - 5433:5432
     restart: on-failure
 
   auth_service_pg:
@@ -28,7 +28,7 @@ services:
     volumes:
       - auth_service_pg_data:/var/lib/postgresql/data
     ports:
-      - 5433:5432
+      - 5432:5432
     restart: on-failure
 
   auth_service_redis:
@@ -51,7 +51,7 @@ services:
       - "127.0.0.1:15672:15672" # Порт для веб-интерфейса RabbitMQ Management
     environment:
       RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: 10092025
+      RABBITMQ_DEFAULT_PASS: user
     healthcheck:
       test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
       interval: 10s

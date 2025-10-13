@@ -125,7 +125,7 @@ class MessageService:
         # self.check_file_extension(file.filename)
         # self.check_file_content_type(file.content_type)
         # self.check_file_size(file)
-        #
+
         processed_file = await self.preprocessing_file(file)
 
         new_filename = self.generate_filename(
@@ -146,7 +146,7 @@ class MessageService:
             user_id=user.id,
             chat_id=chat.id
         )
-        #
+
         # await self.s3.upload_file(
         #     file=processed_file,
         #     filename=new_filename

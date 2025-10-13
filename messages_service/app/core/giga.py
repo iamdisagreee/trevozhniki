@@ -32,6 +32,7 @@ class GigaChatClient:
         return base64.b64encode(f"{self.client_id}:{self.client_secret}".encode('utf-8')).decode('utf-8')
 
     def token(self):
+        # print(self.expires_at)
         if time.time() < self.expires_at - 30 * 60:
             return
 
