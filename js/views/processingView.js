@@ -57,7 +57,7 @@ export class View {
     printingText(text, position) {
         if (position === text.length) return
             this.elements.out.textContent += text[position]
-        setTimeout(() => this.printingText(text, position+1), 0)
+        setTimeout(() => this.printingText(text, position+1), 50)
     }
 
     isFileUploaded() {

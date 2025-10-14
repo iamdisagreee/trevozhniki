@@ -19,8 +19,8 @@ export class View {
             // li.innerHTML = `
             //     <a href="storage-item.html?id=${chat.id}" class="storage__item-text">${chat.name}</a>
             //     <button class="storage__item-remove" data-id=${chat.id}>Удалить</button></li>`
-
-            const createdAt = new Date(chat.createdAt).toLocaleString('ru-RU', {
+            console.log(chat.createdAt)
+            const createdAt = new Date(chat.createdAt + 'Z').toLocaleString('ru-RU', {
                   timeZone: 'Europe/Moscow',
                   year: "numeric",
                   month: "2-digit",

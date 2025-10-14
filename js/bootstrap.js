@@ -1,8 +1,9 @@
-import { renderAppHeader } from './components/appHeader.js'
+import { renderHeader } from './components/renderHeader.js'
 
 document.addEventListener('DOMContentLoaded', async () => {
     const page = document.body.dataset.page
-    // renderAppHeader()
+
+    await renderHeader()
 
     switch (page) {
         case 'index': {
@@ -32,12 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         case 'storage-item': {
             const storageItemModule = await import ('./controllers/storageItemController.js')
             storageItemModule.initController()
-            break
-        }
-        
-        case 'storage': {
-            const storageModule = await import ('./controllers/storageController.js')
-            storageModule.initController()
             break
         }
     }

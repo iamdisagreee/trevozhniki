@@ -1,10 +1,12 @@
-import { Model } from '../models/storageModel.js'
-import { View } from '../views/storageView.js'
+import { Model } from '../models/headerModel.js'
+import { View } from '../views/headerView.js'
 
 const model = new Model()
 const view = new View(await model.authorizedGetLimitChats())
 
-export async function initController() {
+await initController()
+
+async function initController() {
     console.log("Test successfull!")
     
     addEventListener()
