@@ -1,18 +1,16 @@
 export async function renderHeader() {
+    
     const header = document.querySelector('.header')
     if (!header) {
         return
     }
     const response = await fetch('../../header.html')
-    console.log(response)
     const html = await response.text()
 
-    // console.log(html)
-        header.innerHTML = html
+    header.innerHTML = html
 
     const oldScripts = header.querySelectorAll('script')
 
-    // console.log(oldScripts)
     oldScripts.forEach(oldScript => {
         const newScript = document.createElement('script')
         

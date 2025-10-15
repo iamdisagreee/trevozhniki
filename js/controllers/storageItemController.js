@@ -15,7 +15,7 @@ export async function initController() {
         console.error(error.message)
         return
     }
-
+    console.log(responseChat.text)
     view.printingText(responseChat.text)
 
     view.disableInput()

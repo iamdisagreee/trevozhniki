@@ -46,6 +46,9 @@ async function handlingFormFile(event) {
     
     const startPosition = 0
     view.printingText(responseProcessing.text, startPosition)
+    
+    
+    // + Логика добавления нового чата в общий список 
 }
 
 function addFilename() {

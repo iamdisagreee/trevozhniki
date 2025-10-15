@@ -19,7 +19,6 @@ export class View {
             // li.innerHTML = `
             //     <a href="storage-item.html?id=${chat.id}" class="storage__item-text">${chat.name}</a>
             //     <button class="storage__item-remove" data-id=${chat.id}>Удалить</button></li>`
-            console.log(chat.createdAt)
             const createdAt = new Date(chat.createdAt + 'Z').toLocaleString('ru-RU', {
                   timeZone: 'Europe/Moscow',
                   year: "numeric",
@@ -31,9 +30,11 @@ export class View {
             })
 
             li.innerHTML = `
-                <div class=storage__item-info>
-                    <img class="storage__item-mood" src="../images/mood.svg">
-                    <a class="storage__item-interlocutor" href="storage-item.html?id=${chat.id}"class="storage__item">
+                <div class="storage__item-info">
+                    <a class="storage__item-mood" href="storage-item.html?id=${chat.id}">
+                        <img class="storage__item-mood-svg" src="../images/mood.svg">
+                    </a>
+                    <a class="storage__item-interlocutor" href="storage-item.html?id=${chat.id}">
                         <span class="storage__item-interlocutor-name">${chat.interlocutor}</span>
                         <span class="storage__item-interlocutor-date">${createdAt}</span>
                     </a>

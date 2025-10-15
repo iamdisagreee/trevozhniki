@@ -55,7 +55,7 @@ body {
     line-height: 1.4;
     font-size: 20px;
     font-style: normal;
-    /* background-color:rgba(74, 118, 73, 0.05); */
+    background-color:rgba(74, 118, 73, 0.05);
 
 }
 
@@ -215,24 +215,22 @@ body {
 
 
 .chat {
-    height: calc(100vh - 100px);
-    /* margin: 0 auto; */
-    border-radius: 50px;
+    max-height: calc(100vh - 100px);
     position: relative;
     margin-left: 300px;
     display: flex;
-    /* justify-content: flex-start ; */
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+    overflow-y: auto;
 }
 
 .out {
-    /* display: flex; */
-    /* justify-content: center; */
-    /* margin-left: 300px; */
-    /* padding: auto auto; */
-    max-width: 50%;
-    padding-top: 30px;
-    margin: 0 auto;
-    /* padding-bottom: 200px; */
+    width: 100%;
+    text-align: left;
+    max-width: 60%;
+    margin-top: 30px;
+    margin-bottom: 100px;
 }
 
 .out::after {
@@ -251,7 +249,7 @@ body {
 
 .form__chat {
     position: fixed;
-    bottom: 2.5%;
+    bottom: 30px;
     left: 300px; 
     right: 0;
     margin: 0 auto;
@@ -263,7 +261,8 @@ body {
     align-items: center;
     justify-content: space-between;
     /* background-color: rgba(74, 118, 73, 0.05); */
-    background-color: white;
+    padding: 0px 15px;
+    /* background-color: grey; */
 }
 
 .form__chat-file {
@@ -273,12 +272,12 @@ body {
 }
 
 .form__chat-file-change svg {
-    margin-left: 10px;
+    /* margin-left: 10px; */
 }
 
 .form__chat-btn-svg {
     /* fill: red; */
-    margin-right: 15px;
+    /* margin-right: 15px; */
 }
 
 .form__chat-btn-svg.active {
@@ -296,11 +295,12 @@ body {
     animation-duration: 2s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
-    position: absolute;
+    position: fixed;
     right: 0;
-    left: 0;
+    left: 300px;
     top: 0;
     bottom: 20%;
+    margin: 0 auto;
     margin: auto;
 }
 
@@ -360,10 +360,11 @@ body {
 /* -------------------------------------------- storage-item.html--------------------------------------------------- */
 
 .out__result {
-    max-width: 60% ;
-    margin: 0 auto;
-    padding-top: 20px;
-    padding-bottom: 200px;
+    width: 100%;
+    text-align: left;
+    max-width: 60%;
+    margin-top: 30px;
+    margin-bottom: 100px;
 }
 
  
@@ -438,7 +439,7 @@ body {
 }
 
 .storage__items {
-    margin-top: 358px;
+    margin-top: 348px;
     margin-bottom: 200px;
     padding: 20px;
     /* display: flex;
@@ -473,7 +474,7 @@ body {
     font-size: 16px;
 }
 
-.storage__item-mood {
+.storage__item-mood-svg {
     height: 40px;
     width: 40px;
     border-radius: 50%;
@@ -519,7 +520,7 @@ body {
   width: 10px;  /* настройка ползунка */            
 }
 
-::-webkit-scrollbar-track {
+header::-webkit-scrollbar-track {
   background: rgba(199, 209, 197, 1);       /* фон трека */
 }
 
