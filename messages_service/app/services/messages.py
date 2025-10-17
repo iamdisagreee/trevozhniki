@@ -155,16 +155,16 @@ class MessageService:
             chat_id=chat.id,
         )
 
-        # await self.s3.upload_file(
-        #     file=processed_file,
-        #     filename=new_filename
-        # )
-        #
-        # return JSONResponse(
-        #     content={"detail": "File successfully loaded",
-        #              "chatId": chat.id,
-        #              "filename": new_filename},
-        # )
+        await self.s3.upload_file(
+            file=processed_file,
+            filename=new_filename
+        )
+
+        return JSONResponse(
+            content={"detail": "File successfully loaded",
+                     "chatId": chat.id,
+                     "filename": new_filename},
+        )
 
         return JSONResponse(
             content={"detail": "File successfully loaded",
@@ -306,43 +306,42 @@ class MessageService:
             user: GetUser
     ):
 
-        # filepath = await self.s3.get_file(filename=file.filename)
-        # uploaded_file = self.giga.upload_file(filepath=filepath)
+        filepath = await self.s3.get_file(filename=file.filename)
+        uploaded_file = self.giga.upload_file(filepath=filepath)
         try:
-            # response = self.giga.request_processing(file_id=uploaded_file.id_).choices[0].message.content
-            # response_text = StringIO(response)
-            #
-            # new_filename = self.generate_filename(
-            #     file_extension='txt',
-            #     username=user.username
-            # )
-            #
-            # upload_file = UploadFile(
-            #     file=response_text,
-            #     filename=new_filename
-            # )
-            #
-            # await self.s3.upload_file(
-            #     file=upload_file,
-            #     filename=new_filename
-            # )
-            #
-            # await self.msg_repo.upload_file(
-            #     filename=new_filename,
-            #     file_extension='txt',
-            #     user_id=user.id,
-            #     chat_id=file.chat_id
-            # )
-            #
-            # return JSONResponse(
-            #     content={'text': response,
-            #              'detail': 'Successfully get response from GigaChat API'}
-            # )
+            response = self.giga.request_processing(file_id=uploaded_file.id_).choices[0].message.content
+            response_text = StringIO(response)
+
+            new_filename = self.generate_filename(
+                file_extension='txt',
+                username=user.username
+            )
+
+            upload_file = UploadFile(
+                file=response_text,
+                filename=new_filename
+            )
+
+            await self.s3.upload_file(
+                file=upload_file,
+                filename=new_filename
+            )
+
+            await self.msg_repo.upload_file(
+                filename=new_filename,
+                file_extension='txt',
+                user_id=user.id,
+                chat_id=file.chat_id
+            )
+
+            return JSONResponse(
+                content={'text': response,
+                         'detail': 'Successfully get response from GigaChat API'}
+            )
 
             return JSONResponse(
                 content={'text': """
-                Есть над чем задуматься: непосредственные участники технического прогресса освещают чрезвычайно интересные особенности картины в целом, однако конкретные выводы, разумеется, ограничены исключительно образом мышления. Сложно сказать, почему некоторые особенности внутренней политики, вне зависимости от их уровня, должны быть описаны максимально подробно. Вот вам яркий пример современных тенденций — начало повседневной работы по формированию позиции требует анализа инновационных методов управления процессами. Таким образом, сложившаяся структура организации способствует повышению качества соответствующих условий активизации. Прежде всего, глубокий уровень погружения однозначно фиксирует необходимость глубокомысленных рассуждений! Не следует, однако, забывать, что сложившаяся структура организации играет важную роль в формировании новых принципов формирования материально-технической и кадровой базы. Прежде всего, высокотехнологичная концепция общественного уклада создаёт необходимость включения в производственный план целого ряда внеочередных мероприятий с учётом комплекса укрепления моральных ценностей. Каждый из нас понимает очевидную вещь: консультация с широким активом однозначно определяет каждого участника как способного принимать собственные решения касаемо прогресса профессионального сообщества.
-                """}
+                Есть над чем задуматься: непосредственные участники технического прогресса освещают чрезвычайно интересные особенности картины в целом, однако конкретные выводы, разумеется, ограничены исключительно образом мышления. Сложно сказать, почему некоторые особенности внутренней политики, вне зависимости от их уровня, должны быть описаны максимально подробно. Вот вам яркий пример современных тенденций — начало повседневной работы по формированию позиции требует анализа инновационных методов управления процессами. Таким образом, сложившаяся структура организации способствует повышению качества соответствующих условий активизации. Прежде всего, глубокий уровень погружения однозначно фиксирует необходимость глубокомысленных рассуждений! Не следует, однако, забывать, что сложившаяся структура организации играет важную роль в формировании новых принципов формирования материально-технической и кадровой базы. Прежде всего, высокотехнологичная концепция общественного уклада создаёт необходимость включения в производственный план целого ряда внеочередных мероприятий с учётом комплекса укрепления моральных ценностей. Каждый из нас понимает очевидную вещь: консультация с широким активом однозначно определяет каждого участника как способного принимать собственные решения касаемо прогресса профессионального сообщества."""}
             )
 
         except ResponseError:
@@ -362,5 +361,5 @@ class MessageService:
             )
         finally:
             pass
-            # os.remove(filepath)
-            # self.giga.delete_file(file_id=uploaded_file.id_)
+            os.remove(filepath)
+            self.giga.delete_file(file_id=uploaded_file.id_)
