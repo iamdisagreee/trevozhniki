@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount('/', StaticFiles(directory='frontend'))
+# app.mount('/', StaticFiles(directory='frontend'))
 
 v1_router = APIRouter(prefix="/api/v1")
 
