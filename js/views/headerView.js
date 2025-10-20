@@ -1,24 +1,47 @@
 export class View {
-    constructor(jsonChats) {
-        this.listChats = jsonChats.chats 
-    }
+    constructor() {}
 
     elements = {
+        openFindChat: document.querySelector('.find-chat__link'),
+        dialogFindChat: document.querySelector('.find-chat__dialog'),
+        closeFindChat: document.querySelector('.find-chat__dialog-close'),
+        inputFindChat: document.querySelector('.find-chat__dialog-input'),
+        chatsFindChat: document.querySelector('.find-chat__dialog-items'),
         nav: document.querySelector('.nav'),
         storage: document.querySelector('.storage__items'),
-        loader: document.querySelector('.loader')
+        loader: document.querySelector('.loader'),
     }
 
-    renderPage(onDeleteChat) {
+    renderDialogFindChat(listChats) {
+        this.elements.chatsFindChat.innerHTML = ''
+        const fragment = document.createDocumentFragment()
+        
+        listChats.forEach((chat) => {
+            const li = document.createElement('li')
+            li.className = 'storage__item'
+            const createdAt = new Date(chat.createdAt + 'Z').toLocaleString('ru-RU')
+            li.innerHTML = `
+                <div class="storage__item-info">
+                    <a class="storage__item-mood" href="storage-item.html?id=${chat.id}">
+                        <img class="storage__item-mood-svg" src="../images/mood.svg">
+                    </a>
+                    <a class="storage__item-interlocutor" href="storage-item.html?id=${chat.id}">
+                        <span class="storage__item-interlocutor-name">${chat.interlocutor}</span>
+                        <span class="storage__item-interlocutor-date">${createdAt}</span>
+                    </a>
+                </div>`
+            fragment.appendChild(li)
+        })
+        this.elements.chatsFindChat.append(fragment)
+    }
+
+    renderStorage(listChats, onDeleteChat) {
         this.elements.storage.innerHTML = ''
         const fragment = document.createDocumentFragment()
 
-        this.listChats.forEach((chat) => {
+        listChats.forEach((chat) => {
             const li = document.createElement('li')
             li.className = 'storage__item'
-            // li.innerHTML = `
-            //     <a href="storage-item.html?id=${chat.id}" class="storage__item-text">${chat.name}</a>
-            //     <button class="storage__item-remove" data-id=${chat.id}>Удалить</button></li>`
             const createdAt = new Date(chat.createdAt + 'Z').toLocaleString('ru-RU', {
                   timeZone: 'Europe/Moscow',
                   year: "numeric",

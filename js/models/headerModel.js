@@ -3,8 +3,46 @@ import { TokenService } from '../services/tokenService.js'
 
 export class Model {
     constructor() {
+        this.listChats = [] 
+        this.filterChats = []
         this.api = new ApiService()
         this.token = new TokenService()
+    }
+
+    async getChatsByLine(line) {
+        try {
+            return this.api.request(
+                `http://127.0.0.1:8002/api/v1/messages/chats-by-line?line=${line}`,
+                    {
+                    method: 'GET',
+                    headers: 
+                    {   
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${this.token.accessToken}`
+                    },
+                }
+            )
+        } catch (error) {
+            throw error
+        }  
+    }
+
+   async authorizedGetChatsByLine(line) {
+        try {
+            return await this.token.authorizedRequestToAPI(() => this.getChatsByLine(line))
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async filterSearch(value) {
+        if (value === '') {
+            this.filterChats = [this.listChats]
+        } else {
+            const filterChats = (await this.authorizedGetChatsByLine(value)).chats
+            console.log('ПОЛУЧИЛИ', filterChats)
+            this.filterChats =filterChats
+        }
     }
 
     async getLimitChats() {
@@ -33,22 +71,31 @@ export class Model {
         }
     }
 
-    async getAdditionalChats(storage) {
-        // const documentC  urrentSize = document.documentElement.getBoundingClientRect()
-        // const currentSizeNav = nav.getBoundingClientRect()
-        const currentSizeNav = storage.getBoundingClientRect()
+    async initialLoadChats() {
+        try {
+            this.listChats = (await this.authorizedGetLimitChats()).chats
+        } catch (error) {
+            throw error
+        }
+    }
+
+
+    async getAdditionalChats(storageView) {
+        const currentSizeNav = storageView.getBoundingClientRect()
         const clientHeight = document.documentElement.clientHeight
 
         console.log(currentSizeNav, clientHeight)
         if (currentSizeNav.bottom < clientHeight + 100) {
             try {
-                return await this.authorizedGetLimitChats()
+                const addditionalChats = (await this.authorizedGetLimitChats()).chats
+                this.listChats.push(...addditionalChats)
+                return true
             }
-            catch {error} {
+            catch (error) {
                 throw error
             }
         }
-        return []
+        return false
     }
     
 

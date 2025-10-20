@@ -2,42 +2,61 @@ import { Model } from '../models/headerModel.js'
 import { View } from '../views/headerView.js'
 
 const model = new Model()
-const view = new View(await model.authorizedGetLimitChats())
+const view = new View()
 
 await initController()
 
 async function initController() {
     console.log("Test successfull!")
-    
-    addEventListener()
-
-    view.renderPage(onDeleteChat)
-}
-
-function addEventListener() {
-    view.elements.nav.addEventListener('scroll', loadingByScroll)
-    window.addEventListener('beforeunload', goBackBeginingStorage)
-}
-
-async function loadingByScroll() {
-    let additionalChats
-    // console.log("AA")
-    try {
-        const storage = view.elements.storage
-        additionalChats = await model.getAdditionalChats(storage)
+    try{
+        await model.initialLoadChats()
     } catch (error) {
         console.error(error.message)
         return
     }
-
-    if (additionalChats.chats) {
-        // view.removeHiddenFromLoad()
-        view.listChats.push(...additionalChats.chats)
-        // setTimeout( () => {console.log("I am sleep fo 5 seconds")}, 5000)
-        // view.addHiddenFromLoad()
-    }
     
-    view.renderPage(onDeleteChat)
+    addEventListener()
+    console.log(model.listChats)
+    view.renderStorage(model.listChats, onDeleteChat)
+}
+
+function addEventListener() {
+    view.elements.openFindChat.addEventListener('click', openDialogFindChat)
+    view.elements.closeFindChat.addEventListener('click', closeDialogFindChat)
+    view.elements.inputFindChat.addEventListener('input', inputFilterFindChat)
+    view.elements.nav.addEventListener('scroll', loadingByScroll)
+    window.addEventListener('beforeunload', goBackBeginingStorage)
+}
+
+async function openDialogFindChat() {
+    view.renderDialogFindChat(model.listChats)
+    view.elements.dialogFindChat.showModal()
+}
+
+async function closeDialogFindChat(){
+    view.elements.dialogFindChat.close()
+}
+
+async function inputFilterFindChat() {
+    const value = this.value.toLowerCase()
+    await model.filterSearch(value)
+    console.log(value, '>', model.filterChats)
+    view.renderDialogFindChat(model.filterChats)
+}
+
+async function loadingByScroll() {
+
+    let isChange
+    try {
+        const storageView = view.elements.storage
+        isChange = await model.getAdditionalChats(storageView)
+    } catch (error) {
+        console.error(error)
+        return
+    }
+    if (isChange){
+        view.renderStorage(model.listChats, onDeleteChat)
+    } 
 
 }
 
