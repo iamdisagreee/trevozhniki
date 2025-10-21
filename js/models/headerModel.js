@@ -5,8 +5,11 @@ export class Model {
     constructor() {
         this.listChats = [] 
         this.filterChats = []
+        this.isLoadingStorage = false
+        this.hasMoreStorage = true
         this.api = new ApiService()
         this.token = new TokenService()
+        
     }
 
     async getChatsByLine(line) {
@@ -36,11 +39,11 @@ export class Model {
     }
 
     async filterSearch(value) {
+        // console.log(`Значение: '${value}'`)
         if (value === '') {
-            this.filterChats = [this.listChats]
+            this.filterChats = []
         } else {
             const filterChats = (await this.authorizedGetChatsByLine(value)).chats
-            console.log('ПОЛУЧИЛИ', filterChats)
             this.filterChats =filterChats
         }
     }
@@ -84,15 +87,23 @@ export class Model {
         const currentSizeNav = storageView.getBoundingClientRect()
         const clientHeight = document.documentElement.clientHeight
 
-        console.log(currentSizeNav, clientHeight)
-        if (currentSizeNav.bottom < clientHeight + 100) {
+        if (currentSizeNav.bottom < clientHeight + 100 && !this.isLoadingStorage && this.hasMoreStorage) {
+            this.isLoadingStorage = true
             try {
                 const addditionalChats = (await this.authorizedGetLimitChats()).chats
-                this.listChats.push(...addditionalChats)
-                return true
+                if (addditionalChats.length) {
+                    this.listChats.push(...addditionalChats)
+                    return true
+                }
+                else {
+                    this.hasMoreStorage = false
+                }
             }
             catch (error) {
                 throw error
+            }
+            finally {
+                this.isLoadingStorage = false
             }
         }
         return false

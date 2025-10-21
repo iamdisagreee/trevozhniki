@@ -7,7 +7,7 @@ export class View {
         formChatStatus: document.querySelector('.form__chat-status'),
         formChatBtn: document.querySelector('.form__chat-btn'),
         formChatBtnSvg: document.querySelector('.form__chat-btn-svg'),
-        loader: document.querySelector('.loader'),
+        loader: document.querySelector('.loader.processing__loader'),
         out: document.querySelector('.out')
     }
 

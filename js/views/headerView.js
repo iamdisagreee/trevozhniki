@@ -1,5 +1,7 @@
 export class View {
-    constructor() {}
+    constructor() {
+        this.blockScrollStorage = false
+    }
 
     elements = {
         openFindChat: document.querySelector('.find-chat__link'),
@@ -7,9 +9,15 @@ export class View {
         closeFindChat: document.querySelector('.find-chat__dialog-close'),
         inputFindChat: document.querySelector('.find-chat__dialog-input'),
         chatsFindChat: document.querySelector('.find-chat__dialog-items'),
+        loaderFindChat: document.querySelector('.loader.find-chat__loader'),
+        openMenuFilters: document.querySelector('.storage__header-open-filters'),
+        storageHeader: document.querySelector('.storage__header'),
+        titleStorageHeader: document.querySelector('.storage__header-title'),
+        sortByDate: document.querySelector('.storage__header-sort-by-date'),
+        sortByAlphabet: document.querySelector('.storage__header-sort-by-alphabet'),
         nav: document.querySelector('.nav'),
         storage: document.querySelector('.storage__items'),
-        loader: document.querySelector('.loader'),
+        loaderStotage: document.querySelector('.loader.storage__loader'),
     }
 
     renderDialogFindChat(listChats) {
@@ -34,6 +42,20 @@ export class View {
         })
         this.elements.chatsFindChat.append(fragment)
     }
+
+    removeHiddenFromLoaderFindChat() {
+        this.elements.loaderFindChat.classList.remove('hidden')
+    }
+
+    addHiddenFromLoaderFindChat() {
+        this.elements.loaderFindChat.classList.add('hidden')
+    }  
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+
+
 
     renderStorage(listChats, onDeleteChat) {
         this.elements.storage.innerHTML = ''
@@ -76,13 +98,13 @@ export class View {
         this.elements.storage.appendChild(fragment)
     }
 
-    removeHiddenFromLoad() {
-        this.elements.loader.classList.remove('hidden')
+    removeHiddenFromLoaderStorage() {
+        this.elements.loaderStotage.classList.remove('hidden')
     }
-
-    addHiddenFromLoad() {
-        this.elements.loader.classList.add('hidden')
-    }
+    
+    addHiddenFromLoaderStorage() {
+        this.elements.loaderStotage.classList.add('hidden')
+    }  
 
     deleteStorageItem(button) {
         const li = button.closest('li')

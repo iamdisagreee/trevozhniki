@@ -24,12 +24,13 @@ function addEventListener() {
     view.elements.openFindChat.addEventListener('click', openDialogFindChat)
     view.elements.closeFindChat.addEventListener('click', closeDialogFindChat)
     view.elements.inputFindChat.addEventListener('input', inputFilterFindChat)
+    view.elements.openMenuFilters.addEventListener('click', openMenuFilters)
     view.elements.nav.addEventListener('scroll', loadingByScroll)
     window.addEventListener('beforeunload', goBackBeginingStorage)
 }
 
 async function openDialogFindChat() {
-    view.renderDialogFindChat(model.listChats)
+    view.renderDialogFindChat(model.filterChats)
     view.elements.dialogFindChat.showModal()
 }
 
@@ -39,22 +40,38 @@ async function closeDialogFindChat(){
 
 async function inputFilterFindChat() {
     const value = this.value.toLowerCase()
+    view.removeHiddenFromLoaderFindChat()
     await model.filterSearch(value)
-    console.log(value, '>', model.filterChats)
+    await view.sleep(500)
+    view.addHiddenFromLoaderFindChat()
     view.renderDialogFindChat(model.filterChats)
 }
 
+function openMenuFilters() {
+    view.elements.titleStorageHeader.classList.toggle('open')
+    view.elements.storageHeader.classList.toggle('open')
+    view.elements.sortByDate.classList.toggle('open')
+    view.elements.sortByAlphabet.classList.toggle('open')
+}
+
+
 async function loadingByScroll() {
+    if (view.blockScrollStorage) return 
 
     let isChange
     try {
         const storageView = view.elements.storage
         isChange = await model.getAdditionalChats(storageView)
     } catch (error) {
-        console.error(error)
+        console.error(error.message)
         return
     }
     if (isChange){
+        view.blockScrollStorage = true
+        view.removeHiddenFromLoaderStorage()
+        await view.sleep(2000)
+        view.addHiddenFromLoaderStorage()
+        view.blockScrollStorage = false
         view.renderStorage(model.listChats, onDeleteChat)
     } 
 
