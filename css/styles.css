@@ -354,11 +354,7 @@ body {
 }
 
 
-.storage__item-remove {
-    border: 1px solid grey;
-    font-size: 20px
-} */
- 
+
 /* -------------------------------------------- storage-item.html--------------------------------------------------- */
 
 .out__result {
@@ -376,6 +372,7 @@ body {
 
 .nav {
     position: fixed;
+    /* overflow-x: visible; */
     overflow-y: scroll;
     scrollbar-width: auto;
     width: 300px;
@@ -406,7 +403,7 @@ body {
 .processing__link {
     display: flex;
     gap: 10px;
-    margin-bottom: 15px;
+    /* margin-bottom: px; */
     height: 50px;
     align-items: center;
 }
@@ -420,6 +417,7 @@ body {
 .find-chat__link {
     display: flex;
     gap: 10px;
+    align-items: center;
     margin-bottom: 20px;
     cursor: pointer;
     height: 50px;
@@ -518,7 +516,7 @@ body {
     justify-content: space-between;
     /* margin-bottom: 20px; */
     align-items: center;
-    height: 50px;
+    height: 60px;
     position: relative;
     /* transform-origin: right; */
 }
@@ -535,6 +533,7 @@ body {
     color: rgba(84, 109, 77, 1);
     font-weight: 600;
     transition: all 0.3s linear;
+
 }
 
 .storage__header-title.open {
@@ -547,15 +546,15 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 50px;
-    /* transition: all 0.3s linear; */
+    transition: all 0.3s linear;
 }
 
 .storage__header-open-filters:hover {
     background-color: rgba(79, 116, 69, 0.2);
+    border-radius: 50px;
 }
 
-.storage__header-filters {
+.storage__header-types-sort {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -563,47 +562,35 @@ body {
     width: 100%;
 }
 
-.storage__header-sort-by-date {
+.storage__header-sort {
     display: flex;
     align-items: center;
+    justify-content: center;
     min-width: 50px;
     min-height: 50px;
     opacity: 0;
-    transition: all 0.3s linear opacity;
+    pointer-events: none;
+    transition: all 0.3s linear ;
 }
 
-.storage__header-sort-by-date.open{
+.storage__header-sort.open{
+    pointer-events: auto;
     opacity: 1;
 }
 
-.storage__header-sort-by-date:hover {
+.storage__header-sort:hover {
     background-color: rgba(79, 116, 69, 0.2);
     border-radius: 50%;
 }
 
-.storage__header-sort-by-alphabet {
-    display: flex;
-    align-items: center;
-    min-width: 50px;
-    min-height: 50px;
-    opacity: 0;
-    transition: all 0.3s linear opacity;
-
+.rotate-up {
+    rotate: 270deg;
 }
 
-.storage__header-sort-by-alphabet.open{
-    opacity: 1;
+.rotate-down {
+    rotate: 90deg;
 }
 
-.storage__header-sort-by-alphabet svg {
-    display: flex;
-    align-items: center;
-}
-
-.storage__header-sort-by-alphabet:hover {
-    background-color: rgba(79, 116, 69, 0.2);
-    border-radius: 50%;
-}
 
 .storage__wrapper{
     /* position: relative; */
@@ -611,24 +598,18 @@ body {
 }
 
 .storage__items {
-    margin-top: 328px;
+    margin-top: 324px;
     /* margin-bottom: 150px; */
     padding: 20px;
-    z-index: 1;
 }
 
 .storage__loader{
     width: 50px;
     height: 50px;
-    /* margin: 30px; */
-    /* bottom: 150px; */
-    margin-bottom: 100px;
-    /* left: 145px; */
+    margin-bottom: 50px;
     margin: 0 auto;
-    /* position: absolute; */
     display: flex;
     justify-content: center;
-    /* margin-left: -25px; */
     z-index: 0;
 }
 
@@ -637,6 +618,15 @@ body {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 15px;
+    padding: 5px;
+    transition: all 0.3s linear;
+    border-radius: 50px;
+    cursor: pointer;
+    position: relative;
+}
+
+.storage__item:hover {
+    background-color: rgba(79, 116, 69, 0.2);
 }
 
 .storage__item-info {
@@ -664,6 +654,39 @@ body {
     width: 40px;
     border-radius: 50%;
 }
+ 
+.storage__item-remove {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50px;
+    transition: all 0.3s linear;
+}
+.storage__item-remove-svg {
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s linear;
+}
+
+.storage__item:hover .storage__item-remove-svg {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.storage__item-remove:hover {
+    background-color: rgba(79, 116, 69, 0.2);
+}
+
+.storage__item-menu {
+    background-color: rgba(79, 116, 69, 0.2);
+    width: 200px;
+    height: 200px;
+    right: -200px;
+    bottom: 0px;
+    position: absolute;
+}
 
 .profile__link {
     position: fixed;
@@ -673,7 +696,6 @@ body {
     width: 290px;
     display: flex;
     gap: 0 14px;
-    z-index: 1;
     
     /* display: grid;
     grid-template-columns: 1fr 1fr; */

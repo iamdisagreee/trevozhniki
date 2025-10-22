@@ -16,17 +16,54 @@ async function initController() {
     }
     
     addEventListener()
-    console.log(model.listChats)
     view.renderStorage(model.listChats, onDeleteChat)
 }
 
 function addEventListener() {
+    view.elements.nav.addEventListener('scroll', loadingByScroll)
+    window.addEventListener('beforeunload', goBackBeginingStorage)
     view.elements.openFindChat.addEventListener('click', openDialogFindChat)
     view.elements.closeFindChat.addEventListener('click', closeDialogFindChat)
     view.elements.inputFindChat.addEventListener('input', inputFilterFindChat)
     view.elements.openMenuFilters.addEventListener('click', openMenuFilters)
-    view.elements.nav.addEventListener('scroll', loadingByScroll)
-    window.addEventListener('beforeunload', goBackBeginingStorage)
+    console.log(view.elements.sortDate)
+    view.elements.sortDate.addEventListener('click', sortByDate)
+    view.elements.sortAlphabet.addEventListener('click', sortByAlphabet)
+    // view.elements.sortSelect.forEach(typeSort =>
+        // typeSort.addEventListener('click', sortingChats)
+    // )
+}
+
+async function loadingByScroll() {
+    if (view.blockScrollStorage) return 
+
+    let isChange
+    try {
+        const storageView = view.elements.storage
+        isChange = await model.getAdditionalChats(storageView)
+    } catch (error) {
+        console.error(error.message)
+        return
+    }
+    if (isChange){
+        view.blockScrollStorage = true
+        view.removeHiddenFromLoaderStorage()
+        await view.sleep(2000)
+        view.addHiddenFromLoaderStorage()
+        view.blockScrollStorage = false
+        view.renderStorage(model.listChats, onDeleteChat)
+        view.goToBaseRotation()
+    } 
+
+}
+
+async function goBackBeginingStorage() {
+    try {
+        await model.authorizedReloadLastChatId()
+    } catch (error) {
+        console.error(error)
+        return
+    }
 }
 
 async function openDialogFindChat() {
@@ -50,42 +87,31 @@ async function inputFilterFindChat() {
 function openMenuFilters() {
     view.elements.titleStorageHeader.classList.toggle('open')
     view.elements.storageHeader.classList.toggle('open')
-    view.elements.sortByDate.classList.toggle('open')
-    view.elements.sortByAlphabet.classList.toggle('open')
+    view.elements.sortDate.classList.toggle('open')
+    view.elements.sortAlphabet.classList.toggle('open')
 }
 
+function sortByDate(event) {
+    const btn = event.currentTarget
+    const sortingDirection = btn.value
+    model.sortingByDate(sortingDirection)
 
-async function loadingByScroll() {
-    if (view.blockScrollStorage) return 
+    btn.value = btn.value === 'desc' ? 'asc' : 'desc'
+    view.renderStorage(model.sortChats)
+    view.rotateDirectionDate(sortingDirection)
+}
 
-    let isChange
-    try {
-        const storageView = view.elements.storage
-        isChange = await model.getAdditionalChats(storageView)
-    } catch (error) {
-        console.error(error.message)
-        return
-    }
-    if (isChange){
-        view.blockScrollStorage = true
-        view.removeHiddenFromLoaderStorage()
-        await view.sleep(2000)
-        view.addHiddenFromLoaderStorage()
-        view.blockScrollStorage = false
-        view.renderStorage(model.listChats, onDeleteChat)
-    } 
+function sortByAlphabet(event) {
+    const btn = event.currentTarget
+    const sortingDirection = btn.value
+    model.sortingByAlphabet(sortingDirection)
+
+    btn.value = btn.value === 'desc' ? 'asc' : 'desc'
+    view.renderStorage(model.sortChats)
+    view.rotateDirectionAlphabet(sortingDirection)
 
 }
 
-async function goBackBeginingStorage() {
-    // console.log("AAAA")
-    try {
-        await model.authorizedReloadLastChatId()
-    } catch (error) {
-        console.error(error)
-        return
-    }
-}
 
 async function onDeleteChat(event) {
     const button = event.currentTarget

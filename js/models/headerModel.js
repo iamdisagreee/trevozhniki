@@ -5,47 +5,12 @@ export class Model {
     constructor() {
         this.listChats = [] 
         this.filterChats = []
+        this.sortChats = []
         this.isLoadingStorage = false
         this.hasMoreStorage = true
         this.api = new ApiService()
         this.token = new TokenService()
         
-    }
-
-    async getChatsByLine(line) {
-        try {
-            return this.api.request(
-                `http://127.0.0.1:8002/api/v1/messages/chats-by-line?line=${line}`,
-                    {
-                    method: 'GET',
-                    headers: 
-                    {   
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${this.token.accessToken}`
-                    },
-                }
-            )
-        } catch (error) {
-            throw error
-        }  
-    }
-
-   async authorizedGetChatsByLine(line) {
-        try {
-            return await this.token.authorizedRequestToAPI(() => this.getChatsByLine(line))
-        } catch (error) {
-            throw error
-        }
-    }
-
-    async filterSearch(value) {
-        // console.log(`Значение: '${value}'`)
-        if (value === '') {
-            this.filterChats = []
-        } else {
-            const filterChats = (await this.authorizedGetChatsByLine(value)).chats
-            this.filterChats =filterChats
-        }
     }
 
     async getLimitChats() {
@@ -76,14 +41,15 @@ export class Model {
 
     async initialLoadChats() {
         try {
-            this.listChats = (await this.authorizedGetLimitChats()).chats
+            const data = (await this.authorizedGetLimitChats()).chats
+            this.listChats = data
+            this.sortChats = data
         } catch (error) {
             throw error
         }
     }
 
-
-    async getAdditionalChats(storageView) {
+        async getAdditionalChats(storageView) {
         const currentSizeNav = storageView.getBoundingClientRect()
         const clientHeight = document.documentElement.clientHeight
 
@@ -93,6 +59,7 @@ export class Model {
                 const addditionalChats = (await this.authorizedGetLimitChats()).chats
                 if (addditionalChats.length) {
                     this.listChats.push(...addditionalChats)
+                    this.sortChats = [...this.listChats]
                     return true
                 }
                 else {
@@ -137,6 +104,77 @@ export class Model {
         } catch (error) {
             throw error
         }
+    }
+
+    async getChatsByLine(line) {
+        try {
+            return this.api.request(
+                `http://127.0.0.1:8002/api/v1/messages/chats-by-line?line=${line}`,
+                    {
+                    method: 'GET',
+                    headers: 
+                    {   
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${this.token.accessToken}`
+                    },
+                }
+            )
+        } catch (error) {
+            throw error
+        }  
+    }
+
+   async authorizedGetChatsByLine(line) {
+        try {
+            return await this.token.authorizedRequestToAPI(() => this.getChatsByLine(line))
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async filterSearch(value) {
+        if (value === '') {
+            this.filterChats = []
+        } else {
+            const filterChats = (await this.authorizedGetChatsByLine(value)).chats
+            this.filterChats =filterChats
+        }
+    }
+
+
+    sortingByDate(sortingDirection) {
+        this.sortChats.sort((a, b) => {
+            return sortingDirection === 'asc'
+            ? Date.parse(a.createdAt) - Date.parse(b.createdAt)
+            : Date.parse(b.createdAt) - Date.parse(a.createdAt) 
+        })
+    }
+
+    sortingByAlphabet(sortingDirection) {
+        this.sortChats.sort((a, b) => {
+            const nameOne = a.interlocutor.toLowerCase()
+            const nameTwo = b.interlocutor.toLowerCase()
+            return sortingDirection === 'asc'
+            ? nameOne > nameTwo ? 1 : -1
+            : nameTwo > nameOne ? 1 : -1 
+        })
+    }
+
+    sortingByParameters(sortingType, sortingDirection) {
+        this.sortChats.sort((a, b) => {
+            switch(sortingType) {
+                case 'date':
+                    return sortingDirection === 'asc'
+                    ? Date.parse(a.createdAt) - Date.parse(b.createdAt)
+                    : Date.parse(b.createdAt) - Date.parse(a.createdAt)
+                case 'alphabet':
+                    const nameOne = a.interlocutor.toLowerCase()
+                    const nameTwo = b.interlocutor.toLowerCase()
+                    return sortingDirection === 'asc'
+                    ? nameOne > nameTwo ? 1 : -1
+                    : nameTwo > nameOne ? 1 : -1
+            }
+        })
     }
 
     async deleteChat(chatId) {
