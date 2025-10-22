@@ -59,6 +59,17 @@ async def create_get_all_chats(
         user_id=current_user.id
     )
 
+@router.get('/chats-by-line', response_class=JSONResponse)
+async def create_get_chats_by_line(
+        line: str,
+        message_service: MessageService = Depends(get_message_service),
+        current_user: GetUser = Depends(get_current_user)
+):
+    return await message_service.get_chats_by_line(
+        line=line,
+        user_id=current_user.id,
+    )
+
 @router.get("/limit-chats", response_class=JSONResponse)
 async def create_get_limit_chats(
         message_service: MessageService = Depends(get_message_service),

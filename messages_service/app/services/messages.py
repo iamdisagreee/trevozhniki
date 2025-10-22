@@ -115,7 +115,6 @@ class MessageService:
 
         interlocutor = self.get_interlocutor(file_json)
 
-
         processed_bytes = new_file.encode('utf-8')
 
         return UploadFile(
@@ -146,7 +145,10 @@ class MessageService:
             user_id=user.id,
         )
 
-        await self.msg_repo.create_file_state(user_id=user.id)
+        await self.msg_repo.create_file_state(
+            user_id=user.id,
+            chat_id=chat.id
+        )
 
         await self.msg_repo.upload_file(
             filename=new_filename,
@@ -189,6 +191,29 @@ class MessageService:
             content=chats_json
         )
 
+    async def get_chats_by_line(
+            self,
+            line: str,
+            user_id: int,
+    ):
+        chats = await self.msg_repo.get_chats_by_line(
+            line=line,
+            user_id=user_id
+        )
+        chats_json = {'chats':
+            [
+                {
+                    'id': chat.id,
+                    'interlocutor': chat.interlocutor,
+                    'createdAt': chat.created_at.isoformat()
+                } for chat in chats
+            ]
+        }
+
+        return JSONResponse(
+            content=chats_json
+        )
+
     async def get_limit_chats(
             self,
             user_id: int
@@ -197,18 +222,23 @@ class MessageService:
 
         if chats_limit:
             await self.msg_repo.update_file_state(
+                user_id=user_id,
                 last_loaded_id=chats_limit[-1].id,
             )
 
-        chats_json = {'chats':
-            [
-                {
-                    'id': chat.id,
-                    'interlocutor': chat.interlocutor,
-                    'createdAt': chat.created_at.isoformat()
-                } for chat in chats_limit
-            ]
-        }
+        chats_list = [
+            {
+                'id': chat.id,
+                'interlocutor': chat.interlocutor,
+                'createdAt': chat.created_at.isoformat()
+            } for chat in chats_limit
+        ]
+        # print(chats_list)
+        # print(chats_list)
+        # chats_list.reverse()
+        # print(*reversed(chats_list))
+        # print(chats_list)
+        chats_json = {'chats': chats_list}
 
         return JSONResponse(
             content=chats_json
