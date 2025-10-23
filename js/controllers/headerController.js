@@ -113,6 +113,10 @@ function sortByAlphabet(event) {
 }
 
 
+function openStorageItemMenu() {
+    console.log('111')
+}
+
 async function onDeleteChat(event) {
     const button = event.currentTarget
 
