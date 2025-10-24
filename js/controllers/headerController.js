@@ -16,7 +16,7 @@ async function initController() {
     }
     
     addEventListener()
-    view.renderStorage(model.listChats, onDeleteChat)
+    view.renderStorage(model.listChats, openStorageItemMenu)
 }
 
 function addEventListener() {
@@ -26,21 +26,18 @@ function addEventListener() {
     view.elements.closeFindChat.addEventListener('click', closeDialogFindChat)
     view.elements.inputFindChat.addEventListener('input', inputFilterFindChat)
     view.elements.openMenuFilters.addEventListener('click', openMenuFilters)
-    console.log(view.elements.sortDate)
     view.elements.sortDate.addEventListener('click', sortByDate)
     view.elements.sortAlphabet.addEventListener('click', sortByAlphabet)
-    // view.elements.sortSelect.forEach(typeSort =>
-        // typeSort.addEventListener('click', sortingChats)
-    // )
+    view.elements.removeStorageItem.addEventListener('click', removeStorageItemById)
 }
 
 async function loadingByScroll() {
     if (view.blockScrollStorage) return 
 
     let isChange
+    const currentSizeNav = view.elements.storage.getBoundingClientRect()
     try {
-        const storageView = view.elements.storage
-        isChange = await model.getAdditionalChats(storageView)
+        isChange = await model.getAdditionalChats(currentSizeNav)
     } catch (error) {
         console.error(error.message)
         return
@@ -48,12 +45,14 @@ async function loadingByScroll() {
     if (isChange){
         view.blockScrollStorage = true
         view.removeHiddenFromLoaderStorage()
-        await view.sleep(2000)
+        await view.sleep(500)
         view.addHiddenFromLoaderStorage()
         view.blockScrollStorage = false
-        view.renderStorage(model.listChats, onDeleteChat)
+        view.renderStorage(model.listChats, openStorageItemMenu)
         view.goToBaseRotation()
-    } 
+    }
+
+    view.isMoveStorageItemMenu()
 
 }
 
@@ -97,7 +96,7 @@ function sortByDate(event) {
     model.sortingByDate(sortingDirection)
 
     btn.value = btn.value === 'desc' ? 'asc' : 'desc'
-    view.renderStorage(model.sortChats)
+    view.renderStorage(model.sortChats, openStorageItemMenu)
     view.rotateDirectionDate(sortingDirection)
 }
 
@@ -107,23 +106,27 @@ function sortByAlphabet(event) {
     model.sortingByAlphabet(sortingDirection)
 
     btn.value = btn.value === 'desc' ? 'asc' : 'desc'
-    view.renderStorage(model.sortChats)
+    view.renderStorage(model.sortChats, openStorageItemMenu)
     view.rotateDirectionAlphabet(sortingDirection)
-
 }
 
 
-function openStorageItemMenu() {
-    console.log('111')
+function openStorageItemMenu(event) {
+    const openMenu = event.currentTarget
+    view.addActiveToStorageItem(openMenu)
+    view.showStorageItemMenu(openMenu)
 }
 
-async function onDeleteChat(event) {
-    const button = event.currentTarget
+async function removeStorageItemById(event) {
+    const chatId = event.currentTarget.closest('div').dataset.id
+    const storageItem = view.elements.storage.querySelector(`[data-id="${chatId}"`)
+
+    console.log(chatId, storageItem)
+
 
     try {
-        await model.authorizedDeleteChat(button.dataset.id)
-        view.deleteStorageItem(button)
-
+        // await model.authorizedDeleteChat(storageItemMenu.dataset.id)
+        // view.deleteStorageItem()
     } catch (error) {
         console.error(error.message)
     }

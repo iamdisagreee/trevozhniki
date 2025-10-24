@@ -49,8 +49,7 @@ export class Model {
         }
     }
 
-        async getAdditionalChats(storageView) {
-        const currentSizeNav = storageView.getBoundingClientRect()
+        async getAdditionalChats(currentSizeNav) {
         const clientHeight = document.documentElement.clientHeight
 
         if (currentSizeNav.bottom < clientHeight + 100 && !this.isLoadingStorage && this.hasMoreStorage) {
