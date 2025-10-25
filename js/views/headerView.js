@@ -151,6 +151,13 @@ export class View {
         openMenu.closest('li').classList.toggle('active')
     }
 
+    isRemoveBackgroundStorageItem() {
+        if (this.activeStorageItemId) {
+            const lastStorageItemId = this.elements.storage.querySelector(`[data-id="${this.activeStorageItemId}"`)
+            lastStorageItemId.classList.remove('active')
+        }
+    }      
+
     showStorageItemMenu(openMenu) {
         
         const storageItem = openMenu.closest('li')
@@ -169,12 +176,9 @@ export class View {
             this.positionYStorageItemId = top
             this.positionScrollStorageItemdId = this.elements.nav.scrollTop
 
-            // ------------
-            if (this.activeStorageItemId) {
-                const lastStorageItemId = this.elements.storage.querySelector(`[data-id="${this.activeStorageItemId}"`)
-                lastStorageItemId.classList.remove('active')
-            }
+            this.isRemoveBackgroundStorageItem()
         }
+
         this.activeStorageItemId = storageItemId
         this.elements.storageItemMenu.dataset.id = storageItemId
     }
@@ -186,12 +190,38 @@ export class View {
         }
     }
 
-    deleteStorageItem(button) {
-        const li = button.closest('li')
-        console.log(li)
-        li.remove()             
-    }    
+    deleteStorageItem(chatId, storageItemMenu) {
+        const storageItem = this.elements.storage.querySelector(`[data-id="${chatId}"`)
 
+        storageItem.remove()    
+        storageItemMenu.classList.remove('open')
+        this.activeStorageItemId = null       
+    }
+
+    closeStorageItemMenuOutside(event) {
+        const menu = this.elements.storageItemMenu
+        const openMenu = event.target.closest('.storage__item-open-menu')
+
+        if (!menu.classList.contains('open')){
+            return
+        }
+
+        if (!menu.contains(event.target) && !openMenu) {
+            menu.classList.remove('open')
+            this.isRemoveBackgroundStorageItem()
+        }
+    }
+
+    closeStorageItemMenuEsc(event) {
+        if (event.key === 'Escape') {
+            const menu = this.elements.storageItemMenu
+
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open')
+                this.isRemoveBackgroundStorageItem()
+            }
+        }
+    }
     removeHiddenFromLoaderStorage() {
         this.elements.loaderStotage.classList.remove('hidden')
     }

@@ -201,6 +201,4 @@ export class Model {
             throw error
         }
     }
-
-
 }

@@ -28,7 +28,11 @@ function addEventListener() {
     view.elements.openMenuFilters.addEventListener('click', openMenuFilters)
     view.elements.sortDate.addEventListener('click', sortByDate)
     view.elements.sortAlphabet.addEventListener('click', sortByAlphabet)
-    view.elements.removeStorageItem.addEventListener('click', removeStorageItemById)
+    view.elements.removeStorageItem.addEventListener('click', removeStorageItemById),
+    document.addEventListener('click', closeStorageItemMenuIfOutside)
+    document.addEventListener('keydown', closeStorageItemMenuIfEsc)
+
+
 }
 
 async function loadingByScroll() {
@@ -118,18 +122,24 @@ function openStorageItemMenu(event) {
 }
 
 async function removeStorageItemById(event) {
-    const chatId = event.currentTarget.closest('div').dataset.id
-    const storageItem = view.elements.storage.querySelector(`[data-id="${chatId}"`)
-
-    console.log(chatId, storageItem)
-
+    const storageItemMenu = event.currentTarget.closest('div')
+    const chatId = storageItemMenu.dataset.id
 
     try {
-        // await model.authorizedDeleteChat(storageItemMenu.dataset.id)
-        // view.deleteStorageItem()
+        await model.authorizedDeleteChat(chatId)
+        view.deleteStorageItem(chatId, storageItemMenu)
+        
     } catch (error) {
         console.error(error.message)
     }
+}
+
+function closeStorageItemMenuIfOutside(event) {
+    view.closeStorageItemMenuOutside(event)
+}
+
+function closeStorageItemMenuIfEsc(event) {
+    view.closeStorageItemMenuEsc(event)
 }
 
 
