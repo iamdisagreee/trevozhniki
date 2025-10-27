@@ -26,6 +26,8 @@ export class View {
         storageItemMenu: document.querySelector('.storage__item-menu'),
         removeStorageItem: document.querySelector('.storage__item-remove'),
         loaderStotage: document.querySelector('.loader.storage__loader'),
+        profileLinkUsername: document.querySelector('.profile__link-username')
+
     }
 
     renderDialogFindChat(listChats) {
@@ -229,6 +231,10 @@ export class View {
     addHiddenFromLoaderStorage() {
         this.elements.loaderStotage.classList.add('hidden')
     }  
+
+    setUsernameProfileLink(username) {
+        this.elements.profileLinkUsername.textContent = username
+    }
 
         
 }               

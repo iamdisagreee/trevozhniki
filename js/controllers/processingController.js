@@ -6,13 +6,21 @@ const view = new View()
 
 export function initController() {
     console.log("Test successfull!")
+    view.disableSendBtn()
     addEventListener()
 }
 
 function addEventListener(){
-    view.elements.formChat.addEventListener('submit', handlingFormFile)
     view.elements.formChatFile.addEventListener('change', addFilename)
+    view.elements.formChat.addEventListener('submit', handlingFormFile)
 }
+
+function addFilename() {
+    view.removeStyleUploadFileError()
+    view.isFileUploaded()
+    view.enableSendBtn()
+}
+
 
 async function handlingFormFile(event) {
     event.preventDefault()
@@ -23,6 +31,7 @@ async function handlingFormFile(event) {
 
     try {
         responseUpload = await model.authorizedUploadFile(validatedChatForm)
+        // console.log(responseUpload)
     }
     catch (error) {
         view.catchUploadError(error)
@@ -46,12 +55,10 @@ async function handlingFormFile(event) {
     
     const startPosition = 0
     view.printingText(responseProcessing.text, startPosition)
-    
-    
-    // + Логика добавления нового чата в общий список 
-}
 
-function addFilename() {
-    view.isFileUploaded()
+    view.disableStyleAfterProcessFile()
+    view.addUploadedFileToStorage(responseUpload)
+    
+    
 }
 

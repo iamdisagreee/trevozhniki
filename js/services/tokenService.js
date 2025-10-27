@@ -86,4 +86,13 @@ export class TokenService{
             throw error
         }
     }
+
+
+    getPayloadJwt() {
+        const jwt = localStorage.getItem('access_token')
+        const tokenParts = jwt.split('.')
+        const decodedPayload = JSON.parse(atob(tokenParts[1]))
+        return decodedPayload
+        
+    }
 }

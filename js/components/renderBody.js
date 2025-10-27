@@ -3,7 +3,7 @@ export async function renderBody() {
 
     switch (dataPage) {
         case 'index': {
-            const indexModule = await import ('..//controllers/indexController.js')
+            const indexModule = await import ('../controllers/indexController.js')
             indexModule.initController()
             break
         }

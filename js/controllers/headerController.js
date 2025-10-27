@@ -16,6 +16,8 @@ async function initController() {
     }
     
     addEventListener()
+
+    setUsernameFromJwt()
     view.renderStorage(model.listChats, openStorageItemMenu)
 }
 
@@ -140,6 +142,11 @@ function closeStorageItemMenuIfOutside(event) {
 
 function closeStorageItemMenuIfEsc(event) {
     view.closeStorageItemMenuEsc(event)
+}
+
+function setUsernameFromJwt() {
+    const username = model.getUsernameFromJwt()
+    view.setUsernameProfileLink(username)
 }
 
 

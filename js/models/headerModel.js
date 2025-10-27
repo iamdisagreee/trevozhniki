@@ -201,4 +201,8 @@ export class Model {
             throw error
         }
     }
+
+    getUsernameFromJwt() {
+        return this.token.getPayloadJwt().username
+    }
 }
