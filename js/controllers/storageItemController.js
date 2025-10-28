@@ -7,6 +7,8 @@ const view = new View()
 export async function initController() {
     console.log('Test successfulll!')
 
+    view.disableInput()
+    
     let responseChat
     const chatId = model.getChatIdByUrl()
     try {
@@ -18,5 +20,4 @@ export async function initController() {
     console.log(responseChat.text)
     view.printingText(responseChat.text)
 
-    view.disableInput()
 }

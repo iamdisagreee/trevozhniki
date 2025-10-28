@@ -4,7 +4,7 @@ export class View {
     elements = {
         formChat: document.querySelector('.form__chat'),
         formChatFile: document.querySelector('.form__chat-file'),
-        formChatFileSvg: document.querySelector('.form__chat-file-svg'),
+        formChatFileLabel: document.querySelector('.form__chat-file-label'),
         formChatStatus: document.querySelector('.form__chat-status'),
         formChatBtn: document.querySelector('.form__chat-btn'),
         formChatBtnSvg: document.querySelector('.form__chat-btn-svg'),
@@ -42,22 +42,24 @@ export class View {
     }
 
     changeStyleUploadFileError() {
+        this.elements.formChat.classList.add('error')
         this.elements.formChatStatus.classList.add('error')
-        this.elements.formChatBtn.classList.add('error')
+        this.elements.formChatBtnSvg.classList.add('error')
     }
 
     removeStyleUploadFileError() {
+        this.elements.formChat.classList.remove('error')
         this.elements.formChatStatus.classList.remove('error')
-        this.elements.formChat.classList.remove('error')    
+        this.elements.formChatBtnSvg.classList.remove('error')    
     }
 
     disableSendBtn() {
-        this.elements.formChatBtnSvg.classList.add('disable')
+        this.elements.formChatBtn.classList.add('disable')
         this.elements.formChatBtn.disabled = true
     }
 
     enableSendBtn() {
-        this.elements.formChatBtnSvg.classList.remove('disable')
+        this.elements.formChatBtn.classList.remove('disable')
         this.elements.formChatBtn.disabled = false
     }
 
@@ -85,11 +87,18 @@ export class View {
 
     isFileUploaded() {
         if (this.elements.formChatFile.files.length > 0){
-            this.elements.formChatStatus.textContent = this.elements.formChatFile.files[0].name
+            const filename = this.elements.formChatFile.files[0].name
+            let slicedFilename = filename.slice(0, 20)
+            if (filename.length > 20){
+                slicedFilename += '...'
+            }
+            // console.log(filename, slicedFilename)
+
+            this.elements.formChatStatus.textContent = slicedFilename        
         }
     }
 
-    addUploadedFileToStorage(chat) {
+    addUploadedFileToStorage(chat, openStorageItemMenu) {
             const li = document.createElement('li')
             li.className = 'storage__item'
             const createdAt = new Date(chat.createdAt + 'Z').toLocaleString('ru-RU', {
@@ -119,14 +128,14 @@ export class View {
                     </svg>
                 </button>
                 `
-            // const toOpenStorageItemMenu = li.querySelector('.storage__item-open-menu')
-            // toOpenStorageItemMenu.addEventListener('click', (event) => openStorageItemMenu(event))
+            const toOpenStorageItemMenu = li.querySelector('.storage__item-open-menu')
+            toOpenStorageItemMenu.addEventListener('click', (event) => openStorageItemMenu(event))
             this.elements.storage__items.insertAdjacentElement('afterbegin', li)
     }
 
     disableStyleAfterProcessFile() {
-        this.elements.formChatFileSvg.classList.add('disable')
-        this.elements.formChatBtnSvg.classList.add('disable')
+        this.elements.formChatFileLabel.classList.add('disable')
+        this.elements.formChatBtn.classList.add('disable')
     }
 
 }

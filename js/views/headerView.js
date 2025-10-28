@@ -1,5 +1,6 @@
 export class View {
     constructor() {
+        this.activeDialogFindChat = false
         this.blockScrollStorage = false
         this.activeStorageItemId = null
         this.positionYStorageItemId = 0
@@ -10,7 +11,7 @@ export class View {
         nav: document.querySelector('.nav'),
         openFindChat: document.querySelector('.find-chat__link'),
         dialogFindChat: document.querySelector('.find-chat__dialog'),
-        closeFindChat: document.querySelector('.find-chat__dialog-close'),
+        closeFindChat: document.querySelector('.find-chat__dialog-close-wrapper'),
         inputFindChat: document.querySelector('.find-chat__dialog-input'),
         chatsFindChat: document.querySelector('.find-chat__dialog-items'),
         loaderFindChat: document.querySelector('.loader.find-chat__loader'),
@@ -31,6 +32,7 @@ export class View {
     }
 
     renderDialogFindChat(listChats) {
+        // console.log('AAAA', this.elements)
         this.elements.chatsFindChat.innerHTML = ''
         const fragment = document.createDocumentFragment()
         
@@ -51,6 +53,11 @@ export class View {
             fragment.appendChild(li)
         })
         this.elements.chatsFindChat.append(fragment)
+    }
+
+    toActivateDialogFindChat() {
+        this.elements.activateDialogFindChat = true
+        this.elements.dialogFindChat.showModal()
     }
 
     removeHiddenFromLoaderFindChat() {
@@ -200,6 +207,7 @@ export class View {
         this.activeStorageItemId = null       
     }
 
+
     closeStorageItemMenuOutside(event) {
         const menu = this.elements.storageItemMenu
         const openMenu = event.target.closest('.storage__item-open-menu')
@@ -211,7 +219,29 @@ export class View {
         if (!menu.contains(event.target) && !openMenu) {
             menu.classList.remove('open')
             this.isRemoveBackgroundStorageItem()
+        }      
+    }
+
+    closeDialogFindChatOutside(event) {
+        const toFindChat = event.target
+        const dialogFindChat = this.elements.dialogFindChat
+        const dialogFindChatRect = dialogFindChat.getBoundingClientRect()
+
+        if (!dialogFindChat.contains(toFindChat)){
+            return
         }
+
+        if (event.clientX < dialogFindChatRect.left ||
+        event.clientX > dialogFindChatRect.right ||
+        event.clientY < dialogFindChatRect.top || 
+        event.clientY > dialogFindChatRect.bottom) {
+            this.elements.dialogFindChat.close()
+        }
+    }
+
+    closeOutside(event) {
+        this.closeStorageItemMenuOutside(event)
+        this.closeDialogFindChatOutside(event)
     }
 
     closeStorageItemMenuEsc(event) {

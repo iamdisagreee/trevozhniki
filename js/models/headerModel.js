@@ -4,6 +4,7 @@ import { TokenService } from '../services/tokenService.js'
 export class Model {
     constructor() {
         this.listChats = [] 
+        this.lastFilteredValue = null
         this.filterChats = []
         this.sortChats = []
         this.isLoadingStorage = false
@@ -131,13 +132,22 @@ export class Model {
         }
     }
 
-    async filterSearch(value) {
-        if (value === '') {
-            this.filterChats = []
-        } else {
-            const filterChats = (await this.authorizedGetChatsByLine(value)).chats
-            this.filterChats =filterChats
-        }
+    async filterSearch(value, renderDialogFindChat, sleep) {
+        console.log(this.lastFilteredValue)
+        clearTimeout(this.lastFilteredValue)
+
+        let oneBar = setTimeout( async () => {
+            if (value === '') {
+                this.filterChats = []
+            } else {
+                const filterChats = (await this.authorizedGetChatsByLine(value)).chats
+                this.filterChats = filterChats
+            }
+            console.log(this.filterChats)
+            renderDialogFindChat(this.filterChats)
+        }, 500)
+
+        this.lastFilteredValue = oneBar
     }
 
 

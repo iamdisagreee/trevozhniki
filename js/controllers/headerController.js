@@ -31,10 +31,8 @@ function addEventListener() {
     view.elements.sortDate.addEventListener('click', sortByDate)
     view.elements.sortAlphabet.addEventListener('click', sortByAlphabet)
     view.elements.removeStorageItem.addEventListener('click', removeStorageItemById),
-    document.addEventListener('click', closeStorageItemMenuIfOutside)
+    document.addEventListener('click', closeIfOutside)
     document.addEventListener('keydown', closeStorageItemMenuIfEsc)
-
-
 }
 
 async function loadingByScroll() {
@@ -73,7 +71,7 @@ async function goBackBeginingStorage() {
 
 async function openDialogFindChat() {
     view.renderDialogFindChat(model.filterChats)
-    view.elements.dialogFindChat.showModal()
+    view.toActivateDialogFindChat()
 }
 
 async function closeDialogFindChat(){
@@ -82,11 +80,23 @@ async function closeDialogFindChat(){
 
 async function inputFilterFindChat() {
     const value = this.value.toLowerCase()
-    view.removeHiddenFromLoaderFindChat()
-    await model.filterSearch(value)
-    await view.sleep(500)
-    view.addHiddenFromLoaderFindChat()
-    view.renderDialogFindChat(model.filterChats)
+
+    clearTimeout(model.lastFilteredValue)
+
+    let oneBar = setTimeout( async () => {
+        view.removeHiddenFromLoaderFindChat()
+        if (value === '') {
+            model.filterChats = []
+        } else {
+            const filterChats = (await model.authorizedGetChatsByLine(value)).chats
+            model.filterChats = filterChats
+        }
+        await view.sleep(500)
+        view.addHiddenFromLoaderFindChat()
+        view.renderDialogFindChat(model.filterChats)
+    }, 500)
+
+    model.lastFilteredValue = oneBar
 }
 
 function openMenuFilters() {
@@ -117,8 +127,11 @@ function sortByAlphabet(event) {
 }
 
 
-function openStorageItemMenu(event) {
+export function openStorageItemMenu(event) {
     const openMenu = event.currentTarget
+
+    console.log(openMenu,openMenu.closest('li') )
+    // console.log(openMenu)
     view.addActiveToStorageItem(openMenu)
     view.showStorageItemMenu(openMenu)
 }
@@ -136,8 +149,8 @@ async function removeStorageItemById(event) {
     }
 }
 
-function closeStorageItemMenuIfOutside(event) {
-    view.closeStorageItemMenuOutside(event)
+function closeIfOutside(event) {
+    view.closeOutside(event)
 }
 
 function closeStorageItemMenuIfEsc(event) {

@@ -1,5 +1,6 @@
 import { Model } from '../models/processingModel.js'
 import { View } from '../views/processingView.js'
+import { openStorageItemMenu } from './headerController.js'
 
 const model = new Model()
 const view = new View()
@@ -16,8 +17,8 @@ function addEventListener(){
 }
 
 function addFilename() {
-    view.removeStyleUploadFileError()
     view.isFileUploaded()
+    view.removeStyleUploadFileError()
     view.enableSendBtn()
 }
 
@@ -30,7 +31,7 @@ async function handlingFormFile(event) {
     let responseUpload
 
     try {
-        responseUpload = await model.authorizedUploadFile(validatedChatForm)
+        responseUpload = (await model.authorizedUploadFile(validatedChatForm)).chat
         // console.log(responseUpload)
     }
     catch (error) {
@@ -40,8 +41,10 @@ async function handlingFormFile(event) {
 
     view.preparingProcessing()
 
-    const { chatId, filename } = responseUpload
+    const { id, filename } = responseUpload
+    const chatId = id
     const bodyToProcessingFile = { chatId, filename } 
+    view.disableStyleAfterProcessFile()
 
     let responseProcessing
     try {
@@ -56,8 +59,8 @@ async function handlingFormFile(event) {
     const startPosition = 0
     view.printingText(responseProcessing.text, startPosition)
 
-    view.disableStyleAfterProcessFile()
-    view.addUploadedFileToStorage(responseUpload)
+    // console.log(responseUpload)
+    view.addUploadedFileToStorage(responseUpload, openStorageItemMenu)
     
     
 }
