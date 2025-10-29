@@ -40,9 +40,9 @@ class MessageRepository:
     ):
         await self.postgres.execute(
             insert(FileState)
-            .values(user_id=user_id, chat_id=chat_id + 1)
+            .values(user_id=user_id, last_loaded_id=chat_id + 1)
             .on_conflict_do_update(index_elements=[FileState.user_id],
-                                   set_={'chat_id': chat_id + 1})
+                                   set_={'last_loaded_id': chat_id + 1})
         )
         await self.postgres.commit()
 
@@ -99,7 +99,7 @@ class MessageRepository:
         result = await self.postgres.scalars(
             select(Chat)
             .where(Chat.user_id == user_id, Chat.id < subquery)
-            .limit(12)
+            .limit(10)
             .order_by(desc(Chat.created_at))
         )
 

@@ -128,9 +128,9 @@ class MessageService:
             file: UploadFile,
             user: GetUser,
     ):
-        # self.check_file_extension(file.filename)
-        # self.check_file_content_type(file.content_type)
-        # self.check_file_size(file)
+        self.check_file_extension(file.filename)
+        self.check_file_content_type(file.content_type)
+        self.check_file_size(file)
 
         processed_file, interlocutor = await self.preprocessing_file(file)
 
@@ -163,9 +163,14 @@ class MessageService:
         )
 
         return JSONResponse(
-            content={"detail": "File successfully loaded",
-                     "chatId": chat.id,
-                     "filename": new_filename},
+            content={'chat': {
+                "id": chat.id,
+                "interlocutor": chat.interlocutor,
+                "createdAt": chat.created_at.isoformat(),
+                'filename': new_filename
+                },
+                "detail": "File successfully loaded",
+            },
         )
 
         return JSONResponse(
