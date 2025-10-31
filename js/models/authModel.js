@@ -21,6 +21,10 @@ export class Model {
         return validatedForm     
     }
 
+    inputPasswordsMatch(passwordFirst, passwordSecond){
+        return passwordFirst === passwordSecond
+    }
+
     async validatedAuthForm(body) {
         try {
             await this.api.request(
