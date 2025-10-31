@@ -25,7 +25,5 @@ export async function renderHeader() {
 
         document.head.appendChild(newScript)
     })
-
-    
 }
 
