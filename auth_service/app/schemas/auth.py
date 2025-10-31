@@ -27,4 +27,4 @@ class SendConfirmationCode(CamelCaseModel):
 
 class ConfirmCode(CamelCaseModel):
     email: EmailStr
-    entered_code: int = Field(ge=100_000, le=999_999)
+    entered_code: int = Field(ge=0)
