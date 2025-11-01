@@ -109,11 +109,12 @@ function closePassword(event) {
 }
 
 async function handlingCodeEntry(event){
-    view.removeCatchCodeError(event)
 
     const replacedCode = view.replaceInputCode(event)
 
     if (event.currentTarget.value.length < 6) return
+
+    view.removeCatchCodeError(event)
 
 
     const getdAuthForm = model.serializeForm(view.elements.formAuth)

@@ -108,7 +108,7 @@ export class View {
     catchPasswordMatches(isPasswordsMatch){
         if (!isPasswordsMatch) {
             this.elements.formAuthPasswordsArea.forEach(pswd => 
-                pswd.classList.add('error')
+                pswd.classList.add('input__code-error')
             )
             this.elements.formAuthError.textContent = 'Пароли не совпадают'
             this.elements.formAuthError.classList.add('active')
@@ -121,7 +121,7 @@ export class View {
         // console.log(this.isIncorrectPasswords)
         if (this.isIncorrectPasswords){
             this.elements.formAuthPasswordsArea.forEach(pswd => 
-                pswd.classList.remove('error')
+                pswd.classList.remove('input__code-error')
             )
             this.elements.formAuthError.classList.remove('active')            
             this.isIncorrectPasswords = false
@@ -182,7 +182,6 @@ export class View {
     removeCatchCodeError(event) {
         this.elements.formCodeArea.classList.remove('input__code-error')
         this.elements.formCodeError.classList.remove('active')
-        // event.target.blur()
-        // this.elements.formCodeError.focus()
+        event.target.blur()
     }
 }
