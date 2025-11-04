@@ -146,6 +146,12 @@ class MessageRepository:
             .options(selectinload(Chat.files))
         )
 
+    async def get_list_to_remove_s3(
+            self,
+            chat_id: int
+    ):
+        return await self.postgres.scalars(select(File.name).where(File.chat_id == chat_id))
+
     async def delete_chat(
             self,
             chat_id: int

@@ -262,6 +262,7 @@ class MessageService:
             self,
             chat_id: int
     ):
+        list_remove_s3 = await self.msg_repo.get_list_to_remove_s3(chat_id=chat_id)
         result_postgres = await self.msg_repo.delete_chat(chat_id=chat_id)
         if not result_postgres.rowcount:
             raise HTTPException(
@@ -269,10 +270,13 @@ class MessageService:
                 detail='There is no chat with such id'
             )
 
+        for filename in list_remove_s3:
+            await self.s3.delete_file(filename=filename)
+            
         # ЛОГИКА УДАЛЕНИЯ ВСЕХ ФАЙЛОВ ИЗ S3...................
 
         return JSONResponse(
-            content={'detail': "Chat successfully deleted"}
+            content={'detail': "Chat successfully deleted with files"}
         )
 
     async def get_chat_by_id(
