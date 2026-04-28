@@ -272,8 +272,6 @@ class MessageService:
 
         for filename in list_remove_s3:
             await self.s3.delete_file(filename=filename)
-            
-        # ЛОГИКА УДАЛЕНИЯ ВСЕХ ФАЙЛОВ ИЗ S3...................
 
         return JSONResponse(
             content={'detail': "Chat successfully deleted with files"}
