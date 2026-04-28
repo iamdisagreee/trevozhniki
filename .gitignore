@@ -7,6 +7,6 @@ docker_info/
 .idea
 messages_service/app/static/*
 messages_service/venv/*
-auth_service/venv/*
+auth_service/venv/
 auth_service/logs/
 messages_service/logs/
